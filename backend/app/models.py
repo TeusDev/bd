@@ -9,14 +9,14 @@ class Plano(SQLModel):
     id_user: int | None = Field(default=None, foreign_key="user.id")
     id_dieta: int | None = Field(default=None, foreign_key="dieta.id")
     id_sessao_treino: int | None = Field(default=None, foreign_key="sessao_treino.id")
-    id_treinador: int | None = Field(default=None, foreing_key="treinador.id")
+    id_treinador: int | None = Field(default=None, foreign_key="treinador.id")
     id_avaliacao: int | None = Field(default=None, foreign_key="avaliacao.id")
     id_local: int | None = Field(default=None, foreign_key="local.id")
 
 class Avaliacoes(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     data_avaliacao: datetime.datetime = Field(
-        default_factory=datetime.datetime.UTC,
+        default_factory=datetime.datetime.utcnow,
     )
     peso: Decimal = Field(default=0, max_digits=5, decimal_places=2)
     altura: Decimal = Field(default=0, max_digits=5, decimal_places=2)
@@ -32,7 +32,7 @@ class Sessao_treino(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     id_treino: int | None = Field(default=None, primary_key=True,foreign_key="treino.id")
     data: datetime.datetime = Field(
-        default_factory=datetime.datetime.UTC,
+        default_factory=datetime.datetime.utcnow,
     )
     duracao_minutos: int | None = Field(default=None)
 

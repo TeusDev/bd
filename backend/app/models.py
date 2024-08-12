@@ -1,8 +1,54 @@
 import uuid
-
+from decimal import Decimal
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel,Session,create_engine,select
+import datetime
 
+class Plano(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    id_user: int | None = Field(default=None, foreign_key="user.id")
+    id_dieta: int | None = Field(default=None, foreign_key="dieta.id")
+    id_sessao_treino: int | None = Field(default=None, foreign_key="sessao_treino.id")
+    id_treinador: int | None = Field(default=None, foreing_key="treinador.id")
+    id_avaliacao: int | None = Field(default=None, foreign_key="avaliacao.id")
+    id_local: int | None = Field(default=None, foreign_key="local.id")
+
+class Avaliacoes(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    data_avaliacao: datetime.datetime = Field(
+        default_factory=datetime.datetime.UTC,
+    )
+    peso: Decimal = Field(default=0, max_digits=5, decimal_places=2)
+    altura: Decimal = Field(default=0, max_digits=5, decimal_places=2)
+    perc_gordura: Decimal = Field(default=0, max_digits=5, decimal_places=2)
+
+class Dieta(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    id_ref_manha: int | None = Field(default=None, primary_key=True,foreign_key="refeicao.id")
+    id_ref_tarde: int | None = Field(default=None, primary_key=True,foreign_key="refeicao.id")
+    id_ref_noite: int | None = Field(default=None, primary_key=True,foreign_key="refeicao.id")
+
+class Sessao_treino(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    id_treino: int | None = Field(default=None, primary_key=True,foreign_key="treino.id")
+    data: datetime.datetime = Field(
+        default_factory=datetime.datetime.UTC,
+    )
+    duracao_minutos: int | None = Field(default=None)
+
+
+class Treino(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    id_exercicio: int | None = Field(default=None, primary_key=True,foreign_key="exercicio.id")
+    grupo_muscular:str | None = Field(default=None, max_length=255)
+
+class Exercicio(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    exercicio:str | None = Field(default=None, max_length=255)
+class Refeicao(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str | None = Field(default=None, max_length=255)
+    calorias: int | None = Field(default=None)
 class Local(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     name: str | None = Field(default=None, max_length=255,primary_key=True)
@@ -12,7 +58,7 @@ class Treinador(SQLModel):
     id_telefone: int | None = Field(default=None, primary_key=True,foreign_key= "telefone.id")
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
-    
+
 class Telefone(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     telefone: str | None = Field(default=None, max_length=255,primary_key=True)

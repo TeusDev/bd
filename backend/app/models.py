@@ -3,7 +3,20 @@ import uuid
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
+class Local(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str | None = Field(default=None, max_length=255,primary_key=True)
 
+class Treinador(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    id_telefone: int | None = Field(default=None, primary_key=True,foreign_key= "telefone.id")
+    name: str | None = Field(default=None, max_length=255)
+    especialidade: str | None = Field(default=None, max_length=255)
+    
+class Telefone(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    telefone: str | None = Field(default=None, max_length=255,primary_key=True)
+    
 # Shared properties
 class User(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
@@ -14,11 +27,11 @@ class User(SQLModel):
 
 
 # Properties to receive via API on creation
-class userCreate(User):
+class UserCreate(User):
     password: str = Field(min_length=8, max_length=40)
 
 
-class userRegister(SQLModel):
+class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
     name: str | None = Field(default=None, max_length=255)

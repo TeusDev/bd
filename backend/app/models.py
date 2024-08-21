@@ -112,3 +112,16 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+##########LUCAS###########################
+
+class Refeicao(SQLModel,table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str | None = Field(default=None, max_length=255)
+    calorias: int | None = Field(default=None)
+
+class Dieta(SQLModel,table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    id_ref_manha: int | None = Field(default=None, primary_key=True,foreign_key="refeicao.id")
+    id_ref_tarde: int | None = Field(default=None, primary_key=True,foreign_key="refeicao.id")
+    id_ref_noite: int | None = Field(default=None, primary_key=True,foreign_key="refeicao.id")

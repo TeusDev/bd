@@ -4,8 +4,16 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, Telefone, TelefoneCreate
 
+def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Telefone:
+    db_obj = Telefone.model_validate(
+        telefone_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     db_obj = User.model_validate(
@@ -36,6 +44,10 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
     session_user = session.exec(statement).first()
     return session_user
 
+def get_telefones(*, session: Session, telefone: str) -> Telefone | None:
+    statement = select(Telefone).where(Telefone.telefone == telefone)
+    telefones = session.exec(statement).first()
+    return telefones
 
 def authenticate(*, session: Session, email: str, password: str) -> User | None:
     db_user = get_user_by_email(session=session, email=email)

@@ -1,8 +1,28 @@
 import uuid
-
+from decimal import Decimal
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel,Session,create_engine,select
+import datetime
+class TreinadorBase(SQLModel):
+    telefone: str | None = Field(default=None,foreign_key= "telefone.telefone")
+    name: str | None = Field(default=None, max_length=255)
+    especialidade: str | None = Field(default=None, max_length=255)
+    
+class Treinador(TreinadorBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
+class TreinadorRegister(Treinador):
+    telefone: int | None = Field(default=None,foreign_key= "telefone.telefone")
+    name: str | None = Field(default=None, max_length=255)
+    especialidade: str | None = Field(default=None, max_length=255)
+class TelefoneBase(SQLModel):
+    telefone: str | None = Field(default=None, primary_key=True,max_length=255)
+class Telefone(TelefoneBase,table=True):
+    pass
+class TelefoneCreate(TelefoneBase):
+    telefone: str | None = Field(default=None, primary_key=True,max_length=255)
+class TelefoneRegister(SQLModel):
+    telefone: str | None = Field(default=None, primary_key=True,max_length=255)
 
 # Shared properties
 class UserBase(SQLModel):
@@ -48,6 +68,10 @@ class User(UserBase, table=True):
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
+    id: uuid.UUID
+
+
+class TelefonePublic(Telefone):
     id: uuid.UUID
 
 

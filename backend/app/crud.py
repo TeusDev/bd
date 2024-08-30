@@ -4,11 +4,30 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, Telefone, TelefoneCreate
+from app.models import (
+    # Item, 
+    # ItemCreate, 
+    User, 
+    UserCreate, 
+    UserUpdate, 
+    Telefone, 
+    TelefoneCreate,
+    TreinadorCreate,
+    Treinador
+)
 
 def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Telefone:
     db_obj = Telefone.model_validate(
         telefone_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def create_treinador(*, session: Session, treinador_create: TreinadorCreate) -> Telefone:
+    db_obj = Treinador.model_validate(
+        treinador_create
     )
     session.add(db_obj)
     session.commit()
@@ -49,6 +68,11 @@ def get_telefones(*, session: Session, telefone: str) -> Telefone | None:
     telefones = session.exec(statement).first()
     return telefones
 
+def get_treinadores(*, session: Session, telefone: str) -> Treinador | None:
+    statement = select(Treinador).where(Treinador.telefone == telefone)
+    treinadores = session.exec(statement).first()
+    return treinadores
+
 def authenticate(*, session: Session, email: str, password: str) -> User | None:
     db_user = get_user_by_email(session=session, email=email)
     if not db_user:
@@ -58,9 +82,9 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
-def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
-    db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
-    session.add(db_item)
-    session.commit()
-    session.refresh(db_item)
-    return db_item
+# def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
+#     db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
+#     session.add(db_item)
+#     session.commit()
+#     session.refresh(db_item)
+#     return db_item

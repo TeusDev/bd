@@ -3,44 +3,56 @@ from decimal import Decimal
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel,Session,create_engine,select
 import datetime
+from .cpf import generate_cpf
+
 class TreinadorBase(SQLModel):
-    telefone: str | None = Field(default=None,foreign_key= "telefone.telefone")
+    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
     
 class Treinador(TreinadorBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    id: str = Field(default=None, primary_key=True,max_length=11)
 
 class TreinadorRegister(Treinador):
-    telefone: int | None = Field(default=None,foreign_key= "telefone.telefone")
+    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
+    name: str | None = Field(default=None, max_length=255)
+    especialidade: str | None = Field(default=None, max_length=255)
+class TreinadorCreate(TreinadorBase):
+    id: str = Field(default=None, primary_key=True,max_length=11)
+    telefone: str | None = Field(default=None, unique=True,max_length=11)
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
 class TelefoneBase(SQLModel):
-    telefone: str | None = Field(default=None, primary_key=True,max_length=255)
+    telefone: str = Field(default=None, primary_key=True,max_length=11)
+
 class Telefone(TelefoneBase,table=True):
     pass
+
 class TelefoneCreate(TelefoneBase):
-    telefone: str | None = Field(default=None, primary_key=True,max_length=255)
+    telefone: str = Field(default=None, primary_key=True,max_length=11)
 class TelefoneRegister(SQLModel):
-    telefone: str | None = Field(default=None, primary_key=True,max_length=255)
+    telefone: str = Field(default=None, primary_key=True,max_length=11)
 
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
-    full_name: str | None = Field(default=None, max_length=255)
+    birthdate: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
+    name: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
+    cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     password: str = Field(min_length=8, max_length=40)
-
 
 class UserRegister(SQLModel):
+    cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
-    full_name: str | None = Field(default=None, max_length=255)
+    birthdate: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
+    name: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on update, all are optional
@@ -50,7 +62,7 @@ class UserUpdate(UserBase):
 
 
 class UserUpdateMe(SQLModel):
-    full_name: str | None = Field(default=None, max_length=255)
+    name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)
 
 
@@ -62,8 +74,9 @@ class UpdatePassword(SQLModel):
 # Database model, database table inferred from class name
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     hashed_password: str
-    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    # items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
@@ -72,7 +85,7 @@ class UserPublic(UserBase):
 
 
 class TelefonePublic(Telefone):
-    id: uuid.UUID
+    telefone: str
 
 
 class UsersPublic(SQLModel):
@@ -80,41 +93,41 @@ class UsersPublic(SQLModel):
     count: int
 
 
-# Shared properties
-class ItemBase(SQLModel):
-    title: str = Field(min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=255)
+# # Shared properties
+# class ItemBase(SQLModel):
+#     title: str = Field(min_length=1, max_length=255)
+#     description: str | None = Field(default=None, max_length=255)
 
 
-# Properties to receive on item creation
-class ItemCreate(ItemBase):
-    pass
+# # Properties to receive on item creation
+# class ItemCreate(ItemBase):
+#     pass
 
 
-# Properties to receive on item update
-class ItemUpdate(ItemBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+# # Properties to receive on item update
+# class ItemUpdate(ItemBase):
+#     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
 
 
-# Database model, database table inferred from class name
-class Item(ItemBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    title: str = Field(max_length=255)
-    owner_id: uuid.UUID = Field(
-        foreign_key="user.id", nullable=False, ondelete="CASCADE"
-    )
-    owner: User | None = Relationship(back_populates="items")
+# # Database model, database table inferred from class name
+# class Item(ItemBase, table=True):
+#     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+#     title: str = Field(max_length=255)
+#     owner_id: uuid.UUID = Field(
+#         foreign_key="user.id", nullable=False, ondelete="CASCADE"
+#     )
+#     owner: User | None = Relationship(back_populates="items")
 
 
-# Properties to return via API, id is always required
-class ItemPublic(ItemBase):
-    id: uuid.UUID
-    owner_id: uuid.UUID
+# # Properties to return via API, id is always required
+# class ItemPublic(ItemBase):
+#     id: uuid.UUID
+#     owner_id: uuid.UUID
 
 
-class ItemsPublic(SQLModel):
-    data: list[ItemPublic]
-    count: int
+# class ItemsPublic(SQLModel):
+#     data: list[ItemPublic]
+#     count: int
 
 
 # Generic message

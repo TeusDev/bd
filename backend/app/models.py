@@ -115,13 +115,39 @@ class NewPassword(SQLModel):
 
 ##########LUCAS###########################
 
-class Refeicao(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class RefeicaoBase(SQLModel):
     name: str | None = Field(default=None, max_length=255)
     calorias: int | None = Field(default=None)
 
-class Dieta(SQLModel,table=True):
+class Refeicao(RefeicaoBase,table=True):
     id: int | None = Field(default=None, primary_key=True)
-    id_ref_manha: int | None = Field(default=None, primary_key=True,foreign_key="refeicao.id")
-    id_ref_tarde: int | None = Field(default=None, primary_key=True,foreign_key="refeicao.id")
-    id_ref_noite: int | None = Field(default=None, primary_key=True,foreign_key="refeicao.id")
+    
+class RefeicaoCreate(RefeicaoBase):
+    id: str = Field(default=None, primary_key=True,max_length=11)
+    name: str | None = Field(default=None, max_length=255)
+    calorias: int | None = Field(default=None, max_length=11)
+
+class RefeicaoPublic(Refeicao):
+    name: str
+
+
+
+class DietaBase(SQLModel):
+    id_ref_manha: int | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_tarde: int | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_noite: int | None = Field(default=None, foreign_key="refeicao.id")
+
+class Dieta(DietaBase,table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    id_ref_manha: int | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_tarde: int | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_noite: int | None = Field(default=None, foreign_key="refeicao.id")
+
+class DietaCreate(DietaBase):
+    id: int | None = Field(default=None, primary_key=True)
+    id_ref_manha: int | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_tarde: int | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_noite: int | None = Field(default=None, foreign_key="refeicao.id")
+
+class DietaPublic(Dieta):
+    id: int # esse eu nao sei o que deveria ser publico

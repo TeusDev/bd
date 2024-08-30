@@ -64,7 +64,7 @@ def create_refeicao(*, session: Session, refeicao: Refeicao):
     session.refresh(refeicao)
     return refeicao
 
-def index_refeicoes(*, session: Session, skip: int = 0, limit: int = 10):
+def get_refeicoes(*, session: Session, skip: int = 0, limit: int = 10):
     refeicoes = session.exec(select(Refeicao).offset(skip).limit(limit)).all()
     return refeicoes
 

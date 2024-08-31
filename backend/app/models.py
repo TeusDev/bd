@@ -9,9 +9,24 @@ class TreinadorBase(SQLModel):
     telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
+
+# Properties to receive via API on update, all are optional
+class TreinadorUpdate(TreinadorBase):
+    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
+    especialidade: str | None = Field(default=None, min_length=8, max_length=40)
+
     
 class Treinador(TreinadorBase, table=True):
     id: str = Field(default=None, primary_key=True,max_length=11)
+
+class TreinadorPublic(TreinadorBase):
+    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
+    name: str | None = Field(default=None, max_length=255)
+    especialidade: str | None = Field(default=None, max_length=255)
+
+class TreinadoresPublic(SQLModel):
+    data: list[TreinadorPublic]
+    count: int
 
 class TreinadorRegister(Treinador):
     telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
@@ -87,6 +102,13 @@ class UserPublic(UserBase):
 class TelefonePublic(Telefone):
     telefone: str
 
+class TelefonesPublic(SQLModel):
+    data: list[TelefonePublic]
+    count: int
+    
+# class ItemsPublic(SQLModel):
+#     data: list[ItemPublic]
+#     count: int
 
 class UsersPublic(SQLModel):
     data: list[UserPublic]

@@ -3,7 +3,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import col, delete, func, select
-
+import re
 from app import crud
 from app.api.deps import (
     CurrentUser,
@@ -65,7 +65,13 @@ def create_telefone(*, session: SessionDep, telefone_in: TelefoneCreate) -> Any:
             status_code=400,
             detail="The telefone with this line already exists in the system.",
         )
-
+    pattern = r"\d{11}"
+    is_valid = bool(re.match(pattern,telefone_in.telefone))
+    if (not is_valid):
+        raise HTTPException(
+            status_code=400,
+            detail="The telefone with this format is not valid.",
+        )
     telefone = crud.create_telefone(session=session, telefone_create=telefone_in)
     return telefone
 

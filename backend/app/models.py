@@ -61,6 +61,7 @@ class UserBase(SQLModel):
 class UserCreate(UserBase):
     cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     password: str = Field(min_length=8, max_length=40)
+    email: EmailStr = Field(unique=True, index=True, max_length=255)
 
 class UserRegister(SQLModel):
     cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
@@ -97,6 +98,9 @@ class User(UserBase, table=True):
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
+    email: str
+    birthdate: datetime.datetime
+    name: str
 
 
 class TelefonePublic(Telefone):

@@ -27,11 +27,7 @@ class TreinadorPublic(TreinadorBase):
 class TreinadoresPublic(SQLModel):
     data: list[TreinadorPublic]
     count: int
-
-class TreinadorRegister(Treinador):
-    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
-    name: str | None = Field(default=None, max_length=255)
-    especialidade: str | None = Field(default=None, max_length=255)
+    
 class TreinadorCreate(TreinadorBase):
     id: str = Field(default=None, primary_key=True,max_length=11)
     telefone: str | None = Field(default=None, unique=True,max_length=11)
@@ -44,8 +40,6 @@ class Telefone(TelefoneBase,table=True):
     pass
 
 class TelefoneCreate(TelefoneBase):
-    telefone: str = Field(default=None, primary_key=True,max_length=11)
-class TelefoneRegister(SQLModel):
     telefone: str = Field(default=None, primary_key=True,max_length=11)
 
 # Shared properties

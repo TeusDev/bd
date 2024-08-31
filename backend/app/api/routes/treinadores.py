@@ -25,11 +25,9 @@ from app.models import (
     UserUpdateMe,
     Telefone,
     TelefoneCreate,
-    TelefoneRegister,
     TelefonePublic,
     Treinador,
     TreinadorCreate,
-    TreinadorRegister,
     TreinadorPublic,
     TreinadoresPublic,
     TreinadorUpdate
@@ -52,6 +50,24 @@ def read_treinadores(session: SessionDep, skip: int = 0, limit: int = 100) -> An
     count = session.exec(count_statement).one()
 
     statement = select(Treinador).offset(skip).limit(limit)
+    treinadores = session.exec(statement).all()
+
+    return TreinadoresPublic(data=treinadores, count=count)
+
+
+@router.get(
+    "/especialidade",
+    response_model=TreinadoresPublic
+)
+def read_treinadores_especialidade(session: SessionDep, especialidade:str,skip: int = 0, limit: int = 100) -> Any:
+    """
+    Retrieve treinadores by speciality.
+    """
+
+    count_statement = select(func.count()).select_from(Treinador).where(Treinador.especialidade == especialidade)
+    count = session.exec(count_statement).one()
+
+    statement = select(Treinador).where(Treinador.especialidade == especialidade).offset(skip).limit(limit)
     treinadores = session.exec(statement).all()
 
     return TreinadoresPublic(data=treinadores, count=count)

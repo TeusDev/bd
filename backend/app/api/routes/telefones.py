@@ -25,7 +25,6 @@ from app.models import (
     UserUpdateMe,
     Telefone,
     TelefoneCreate,
-    TelefoneRegister,
     TelefonePublic,
     TelefonesPublic
 )

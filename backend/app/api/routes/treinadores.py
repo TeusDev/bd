@@ -56,6 +56,21 @@ def read_treinadores(session: SessionDep, skip: int = 0, limit: int = 100) -> An
 
 
 @router.get(
+    "/telefone",
+    response_model=TreinadorPublic
+)
+def read_treinadores_tel(session: SessionDep, telefone:str) -> Any:
+    """
+    Retrieve treinadores by telefone.
+    """
+
+    statement = select(Treinador).where(Treinador.telefone == telefone)
+    treinador = session.exec(statement).all()
+
+    return treinador
+
+
+@router.get(
     "/especialidade",
     response_model=TreinadoresPublic
 )

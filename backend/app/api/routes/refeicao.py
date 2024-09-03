@@ -15,7 +15,8 @@ from app.core.security import get_password_hash, verify_password
 from app.models import (
     Refeicao,
     RefeicaoCreate,
-    RefeicaoPublic
+    RefeicaoPublic,
+    RefeicoesPublic
 )
 from app.utils import generate_new_account_email, send_email
 
@@ -24,7 +25,7 @@ router = APIRouter()
 
 @router.get(
     "/",
-    response_model=RefeicaoPublic,
+    response_model=RefeicoesPublic,
 )
 def read_refeicoes(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
@@ -37,7 +38,7 @@ def read_refeicoes(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     statement = select(Refeicao).offset(skip).limit(limit)
     refeicoes = session.exec(statement).all()
 
-    return RefeicaoPublic(data=refeicoes, count=count)
+    return RefeicoesPublic(data=refeicoes, count=count)
 
 
 @router.post(
@@ -47,7 +48,7 @@ def create_refeicao(*, session: SessionDep, refeicao_in: RefeicaoCreate) -> Any:
     """
     Create new refeicao.
     """
-    refeicao = crud.get_refeicoes(session=session, refeicao=refeicao_in.refeicao)
+    refeicao = crud.get_refeicao(session=session,refeicao_id=refeicao_in.id)
     if refeicao:
         raise HTTPException(
             status_code=400,

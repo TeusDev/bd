@@ -17,7 +17,7 @@ def read_items(
     """
     Retrieve items.
     """
-
+    
     if current_user.is_superuser:
         count_statement = select(func.count()).select_from(Item)
         count = session.exec(count_statement).one()

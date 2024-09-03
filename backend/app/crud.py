@@ -58,26 +58,28 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
 ##########LUCAS###########################
 # TODO: passar paramentros: refeicao_id
 
-def create_refeicao(*, session: Session, refeicao: Refeicao):
-    session.add(refeicao)
+def create_refeicao(*, session: Session, refeicao_create: RefeicaoCreate):
+    db_obj = Refeicao.model_validate(
+        refeicao_create
+    )
+    session.add(db_obj)
     session.commit()
-    session.refresh(refeicao)
-    return refeicao
+    session.refresh(db_obj)
+    return db_obj
 
 def get_refeicoes(*, session: Session, skip: int = 0, limit: int = 10):
-    refeicoes = session.exec(select(Refeicao).offset(skip).limit(limit)).all()
+    statement = select(Refeicao)
+    refeicoes = session.exec(select(statement).offset(skip).limit(limit)).all()
     return refeicoes
 
-def get_refeicao(*, session: Session, refeicao_id: int):
+def get_refeicao(*, session: Session, refeicao_id: str):
     refeicao = session.get(Refeicao, refeicao_id)
-    if not refeicao:
-        raise HTTPException(status_code=404, detail="Refeição não encontrada")
+    # statement = select(Refeicao).where(Refeicao.id == id)
     return refeicao
 
-def update_refeicao(*, session: Session, refeicao_id: int, refeicao: Refeicao):
+def update_refeicao(*, session: Session, refeicao_id: str, refeicao: Refeicao):
     db_refeicao = session.get(Refeicao, refeicao_id)
-    if not db_refeicao:
-        raise HTTPException(status_code=404, detail="Refeição não encontrada")
+    
     for key, value in refeicao.dict(exclude_unset=True).items():
         setattr(db_refeicao, key, value)
     session.add(db_refeicao)
@@ -85,7 +87,7 @@ def update_refeicao(*, session: Session, refeicao_id: int, refeicao: Refeicao):
     session.refresh(db_refeicao)
     return db_refeicao
 
-def delete_refeicao(*, session: Session, refeicao_id: int):
+def delete_refeicao(*, session: Session, refeicao_id: str):
     refeicao = session.get(Refeicao, refeicao_id)
     if not refeicao:
         raise HTTPException(status_code=404, detail="Refeição não encontrada")
@@ -95,23 +97,26 @@ def delete_refeicao(*, session: Session, refeicao_id: int):
 
 
 
-def create_dieta(*, session: Session, dieta: Dieta):
-    session.add(dieta)
+def create_dieta(*, session: Session, dieta_create: Dieta):
+    db_obj = Dieta.model_validate(
+        dieta_create
+    )
+    session.add(db_obj)
     session.commit()
-    session.refresh(dieta)
-    return dieta
+    session.refresh(db_obj)
+    return db_obj
 
 def index_dietas(*, session: Session, skip: int = 0, limit: int = 10):
     dietas = session.exec(select(Dieta).offset(skip).limit(limit)).all()
     return dietas
 
-def get_dieta(*, session: Session, dieta_id: int):
+def get_dieta(*, session: Session, dieta_id: str):
     dieta = session.get(Dieta, dieta_id)
     if not dieta:
         raise HTTPException(status_code=404, detail="Dieta não encontrada")
     return dieta
 
-def update_dieta(*, session: Session, dieta_id: int, dieta: Dieta):
+def update_dieta(*, session: Session, dieta_id: str, dieta: Dieta):
     db_dieta = session.get(Dieta, dieta_id)
     if not db_dieta:
         raise HTTPException(status_code=404, detail="Dieta não encontrada")
@@ -122,7 +127,7 @@ def update_dieta(*, session: Session, dieta_id: int, dieta: Dieta):
     session.refresh(db_dieta)
     return db_dieta
 
-def delete_dieta(*, session: Session, dieta_id: int):
+def delete_dieta(*, session: Session, dieta_id: str):
     dieta = session.get(Dieta, dieta_id)
     if not dieta:
         raise HTTPException(status_code=404, detail="Dieta não encontrada")

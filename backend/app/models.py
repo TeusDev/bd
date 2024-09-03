@@ -72,7 +72,7 @@ class ItemUpdate(ItemBase):
 
 # Database model, database table inferred from class name
 class Item(ItemBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    id: uuid.UUID = Field(default_factory=None, primary_key=True)
     title: str = Field(max_length=255)
 
 # Properties to return via API, id is always required
@@ -113,34 +113,38 @@ class RefeicaoBase(SQLModel):
     calorias: int | None = Field(default=None)
 
 class Refeicao(RefeicaoBase,table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: str = Field(default_factory=None, primary_key=True)
     
 class RefeicaoCreate(RefeicaoBase):
-    id: str = Field(default=None, primary_key=True,max_length=11)
-    name: str | None = Field(default=None, max_length=255)
-    calorias: int | None = Field(default=None, max_length=11)
+    id: str
 
 class RefeicaoPublic(Refeicao):
     name: str
+    calorias: int
 
-
+class RefeicoesPublic(SQLModel):
+    data: list[RefeicaoPublic]
+    count: int
 
 class DietaBase(SQLModel):
-    id_ref_manha: int | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_tarde: int | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_noite: int | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_manha: str | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_tarde: str | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_noite: str | None = Field(default=None, foreign_key="refeicao.id")
 
 class Dieta(DietaBase,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    id_ref_manha: int | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_tarde: int | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_noite: int | None = Field(default=None, foreign_key="refeicao.id")
+    id: str = Field(default_factory=None, primary_key=True)
 
 class DietaCreate(DietaBase):
-    id: int | None = Field(default=None, primary_key=True)
-    id_ref_manha: int | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_tarde: int | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_noite: int | None = Field(default=None, foreign_key="refeicao.id")
+    id: str
+
 
 class DietaPublic(Dieta):
-    id: int # esse eu nao sei o que deveria ser publico
+    id: str
+    id_ref_manha: str
+    id_ref_tarde: str
+    id_ref_noite: str
+    
+class DietasPublic(SQLModel):
+    data: list[DietaPublic]
+    count: int
+

@@ -169,3 +169,68 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+class PlanoBase(SQLModel):
+    id: int | None = Field(default_factory=None, primary_key=True)
+    id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id")
+    id_dieta: int | None = Field(default_factory=None)
+    id_sessao_treino: int | None = Field(default_factory=None)
+    id_treinador: int | None = Field(default_factory=None)
+    id_avaliacao : int | None = Field(default_factory = None)
+    local: str | None = Field(default_factory=None)
+
+
+class PlanoCreate(PlanoBase):
+    id_dieta: int | None = Field(default_factory=None)
+    id_sessao_treino: int | None = Field(default_factory=None)
+    id_treinador: int | None = Field(default_factory=None)
+    id_avaliacao : int | None = Field(default_factory = None)
+    local: str | None = Field(default_factory=None)
+
+
+
+class PlanoUpdate(PlanoBase):
+    id_dieta: int | None = Field(default_factory=None)
+    id_sessao_treino: int | None = Field(default_factory=None)
+    id_treinador: int | None = Field(default_factory=None)
+    id_avaliacao : int | None = Field(default_factory = None)
+    local: str | None = Field(default_factory=None)
+
+class Plano(PlanoBase, table=True):
+    pass
+class PlanoPublic(PlanoBase):
+    pass
+
+class PlanosPublic(SQLModel):
+    data: list[PlanoPublic]
+    count: int
+
+
+class AvaliacaoBase(SQLModel):
+    data_avaliacao: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
+    peso: float = Field(default = 0.0)
+    altura: float = Field(default = 0.0)
+    perc_gordura: float = Field(default = 0.0)
+    
+class AvaliacaoCreate(AvaliacaoBase):
+    id: int | None = Field(default=None,primary_key=True) 
+
+
+class AvaliacaoUpdate(AvaliacaoBase):
+    data_avaliacao: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
+    peso: float = Field(default = 0.0)
+    altura: float = Field(default = 0.0)
+    perc_gordura: float = Field(default = 0.0)
+
+
+class Avaliacao(AvaliacaoBase, table=True):
+    id: int | None = Field(default=None,primary_key=True) 
+
+
+class AvaliacaoPublic(AvaliacaoBase):
+    id: int
+
+
+class AvaliacoesPublic(SQLModel):
+    data: list[AvaliacaoPublic]
+    count: int

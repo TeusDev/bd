@@ -7,7 +7,8 @@ from app.api.routes import (
     telefones,
     treinadores,
     planos,
-    avaliacoes
+    avaliacoes,
+    shapes
 )
 
 api_router = APIRouter()
@@ -18,6 +19,6 @@ api_router.include_router(telefones.router,prefix="/telefones",tags=["telefones"
 api_router.include_router(treinadores.router,prefix="/treinadores",tags=["treinadores"])
 api_router.include_router(planos.router,prefix="/planos",tags=["planos"])
 api_router.include_router(avaliacoes.router,prefix="/avaliacoes",tags=["avaliacoes"])
-
+api_router.include_router(shapes.router,prefix="/shapes,",tags=["shapes"])
 
 # api_router.include_router(items.router, prefix="/items", tags=["items"])

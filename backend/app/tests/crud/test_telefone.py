@@ -13,20 +13,20 @@ N = 11
 
 
 def test_create_telefone(db: Session) -> None:
-    telefonez = ''.join(secrets.choice(string.ascii_uppercase + string.digits)
-              for i in range(N))
-    telefone_in = TelefoneCreate(telefone=telefonez)
-    telefonek = crud.create_telefone(session=db, telefone_create=telefone_in)
-    assert telefonek.telefone == telefonez
+    for i in range(50):
+        telefonez = ''.join(secrets.choice(string.digits) for i in range(N))
+        telefone_in = TelefoneCreate(telefone=telefonez)
+        telefonek = crud.create_telefone(session=db, telefone_create=telefone_in)
+        assert telefonek.telefone == telefonez
 
 
 def test_get_telefone(
     db: Session
 ) -> None:
-    telefone = ''.join(secrets.choice(string.ascii_uppercase + string.digits)
-              for i in range(N))
-    telefone_in = TelefoneCreate(telefone=telefone)
-    telefone2 = crud.create_telefone(session=db, telefone_create=telefone_in)
-    existing_telefone = crud.get_telefones(session=db, telefone=telefone)
-    assert existing_telefone
+    for i in range(50):
+        telefone = ''.join(secrets.choice(string.digits) for i in range(N))
+        telefone_in = TelefoneCreate(telefone=telefone)
+        telefone2 = crud.create_telefone(session=db, telefone_create=telefone_in)
+        existing_telefone = crud.get_telefones(session=db, telefone=telefone)
+        assert existing_telefone
 

@@ -89,8 +89,6 @@ def update_refeicao(*, session: Session, refeicao_id: str, refeicao: Refeicao):
 
 def delete_refeicao(*, session: Session, refeicao_id: str):
     refeicao = session.get(Refeicao, refeicao_id)
-    if not refeicao:
-        raise HTTPException(status_code=404, detail="Refeição não encontrada")
     session.delete(refeicao)
     session.commit()
     return {"ok": True}
@@ -112,14 +110,10 @@ def index_dietas(*, session: Session, skip: int = 0, limit: int = 10):
 
 def get_dieta(*, session: Session, dieta_id: str):
     dieta = session.get(Dieta, dieta_id)
-    if not dieta:
-        raise HTTPException(status_code=404, detail="Dieta não encontrada")
     return dieta
 
 def update_dieta(*, session: Session, dieta_id: str, dieta: Dieta):
     db_dieta = session.get(Dieta, dieta_id)
-    if not db_dieta:
-        raise HTTPException(status_code=404, detail="Dieta não encontrada")
     for key, value in dieta.dict(exclude_unset=True).items():
         setattr(db_dieta, key, value)
     session.add(db_dieta)
@@ -129,8 +123,6 @@ def update_dieta(*, session: Session, dieta_id: str, dieta: Dieta):
 
 def delete_dieta(*, session: Session, dieta_id: str):
     dieta = session.get(Dieta, dieta_id)
-    if not dieta:
-        raise HTTPException(status_code=404, detail="Dieta não encontrada")
     session.delete(dieta)
     session.commit()
     return {"ok": True}

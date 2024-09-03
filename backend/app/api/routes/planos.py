@@ -17,7 +17,7 @@ from app.models import (
 router = APIRouter()
 
 @router.get("/",response_model=PlanosPublic)
-def read_planos ( session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+def read_planos ( session: SessionDep, skip: int = 0, limit: int = 100
 ) -> Any:
     count_statement = select(func.count()).select_from(Plano)
     count = session.exec(count_statement).one()

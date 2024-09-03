@@ -4,6 +4,8 @@ from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel,Session,create_engine,select
 import datetime
 from .cpf import generate_cpf
+from sqlalchemy import LargeBinary,Column
+import base64
 
 class TreinadorBase(SQLModel):
     telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
@@ -179,7 +181,6 @@ class PlanoBase(SQLModel):
     id_avaliacao : int | None = Field(default_factory = None)
     local: str | None = Field(default_factory=None)
 
-
 class PlanoCreate(PlanoBase):
     id_dieta: int | None = Field(default_factory=None)
     id_sessao_treino: int | None = Field(default_factory=None)
@@ -226,11 +227,33 @@ class AvaliacaoUpdate(AvaliacaoBase):
 class Avaliacao(AvaliacaoBase, table=True):
     id: int | None = Field(default=None,primary_key=True) 
 
-
 class AvaliacaoPublic(AvaliacaoBase):
     id: int
 
 
 class AvaliacoesPublic(SQLModel):
     data: list[AvaliacaoPublic]
+    count: int
+    
+class ShapeBase(SQLModel):
+    nome_foto: str = Field(primary_key=True)
+class Shape(ShapeBase, table=True):
+    foto: bytes | None = Field(default=None, sa_column=Column(LargeBinary))
+class ShapeCreate(ShapeBase):
+    pass
+class ShapeDelete(Shape):
+    pass
+
+class ShapePublic(Shape):
+    nome_foto: str
+    foto: str | None = None  # Use str to store base64 encoded string
+
+    @classmethod
+    def from_orm(cls, shape):
+        # Base64 encode the binary data
+        foto_encoded = base64.b64encode(shape.foto).decode('utf-8') if shape.foto else None
+        return cls(nome_foto=shape.nome_foto, foto=foto_encoded)
+
+class ShapesPublic(SQLModel):
+    data: list[ShapePublic]
     count: int

@@ -1,47 +1,59 @@
 import uuid
 from typing import Any
+from sqlmodel import Session, select
+import io
 
 from fastapi import (
     APIRouter, 
     HTTPException,
     UploadFile,
-    File
+    File)
+
+from fastapi.responses import StreamingResponse
+from sqlmodel import col, delete, func, select
+import re
+from app import crud
+from app.api.deps import (
+    CurrentUser,
+    SessionDep,
+    get_current_active_superuser,
 )
-from sqlmodel import func, select
+from app.core.config import settings
+from app.core.security import get_password_hash, verify_password
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
-    Plano,
-    PlanoBase,
-    PlanoCreate,
-    PlanosPublic,
-    PlanoUpdate,
-    PlanoPublic
+    Shape,
+    ShapeBase,
+    ShapeCreate,
+    ShapeDelete,
+    ShapePublic,
+    ShapesPublic
 )
 
 router = APIRouter()
+@router.post("/shapes/", response_model=ShapePublic)
+async def create_upload_file(
+    session: SessionDep,
+    nome_foto: str,
+    file: UploadFile = File(...)
+):
+    contents = await file.read()
+    new_shape = Shape(nome_foto=nome_foto, foto=contents)
+    session.add(new_shape)
+    session.commit()
+    session.refresh(new_shape)
 
-@router.post("/shapes/")
-async def create_upload_file(file: UploadFile = File(...)):
+    # Return the ShapePublic model with base64-encoded image
+    return ShapePublic.from_orm(new_shape)
 
-    file.filename = f"{uuid.uuid4()}.jpg"
-    contents = await file.read()  # <-- Important!
+@router.get("/shapes/{shape_id}/foto")
+async def get_foto( session: SessionDep,
+    nome_foto: str):
+    # Fetch the shape by ID
+    shape = select(Shape).where(Shape.nome_foto==nome_foto)
+    if not shape or not shape.foto:
+        raise HTTPException(status_code=404, detail="Shape or photo not found")
 
-    # example of how you can save the file
-    with open(f"{IMAGEDIR}{file.filename}", "wb") as f:
-        f.write(contents)
-
-    return {"filename": file.filename}
-
-
-@router.get("/shapes/")
-async def read_random_file():
-
-    # get a random file from the image directory
-    files = os.listdir(IMAGEDIR)
-    random_index = randint(0, len(files) - 1)
-
-    path = f"{IMAGEDIR}{files[random_index]}"
-    
-    # notice you can use FileResponse now because it expects a path
-    return FileResponse(path)
+    # Create a streaming response with the image content
+    return StreamingResponse(io.BytesIO(shape.foto), media_type="image/png")

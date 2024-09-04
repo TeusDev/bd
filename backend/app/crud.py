@@ -13,7 +13,13 @@ from app.models import (
     Telefone, 
     TelefoneCreate,
     TreinadorCreate,
-    Treinador
+    Treinador,
+    Avaliacao,
+    AvaliacaoCreate,
+    AvaliacaoUpdate,
+    Plano,
+    PlanoCreate,
+    PlanoUpdate
 )
 
 def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Telefone:
@@ -25,7 +31,25 @@ def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Tel
     session.refresh(db_obj)
     return db_obj
 
-def create_treinador(*, session: Session, treinador_create: TreinadorCreate) -> Telefone:
+def create_avaliacao(*,session:Session,avaliacao_create:AvaliacaoCreate) -> Avaliacao:
+    db_obj = Avaliacao.model_validate(
+        avaliacao_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def create_plano(*,session:Session,plano_create:PlanoCreate) -> Plano:
+    db_obj = Plano.model_validate(
+        plano_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def create_treinador(*, session: Session, treinador_create: TreinadorCreate) -> Treinador:
     db_obj = Treinador.model_validate(
         treinador_create
     )
@@ -74,6 +98,11 @@ def get_treinadores(*, session: Session, telefone: str) -> Treinador | None:
     statement = select(Treinador).where(Treinador.telefone == telefone)
     treinadores = session.exec(statement).first()
     return treinadores
+
+def get_avaliacoes(*, session: Session, id: int) -> Avaliacao | None:
+    statement = select(Avaliacao).where(Avaliacao.id == id)
+    avaliacoes = session.exec(statement).first()
+    return avaliacoes
 
 def authenticate(*, session: Session, email: str, password: str) -> User | None:
     db_user = get_user_by_email(session=session, email=email)

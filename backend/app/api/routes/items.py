@@ -9,7 +9,6 @@
 
 # router = APIRouter()
 
-
 # @router.get("/", response_model=ItemsPublic)
 # def read_items(
 #     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100

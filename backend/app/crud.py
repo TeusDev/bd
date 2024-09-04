@@ -4,6 +4,7 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
+
 from app.models import (
     # Item, 
     # ItemCreate, 
@@ -113,6 +114,84 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     return db_user
 
 
+def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
+    db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
+    session.add(db_item)
+    session.commit()
+    session.refresh(db_item)
+    return db_item
+
+##########LUCAS###########################
+# TODO: passar paramentros: refeicao_id
+
+def create_refeicao(*, session: Session, refeicao_create: RefeicaoCreate):
+    db_obj = Refeicao.model_validate(
+        refeicao_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def get_refeicoes(*, session: Session, skip: int = 0, limit: int = 10):
+    statement = select(Refeicao)
+    refeicoes = session.exec(select(statement).offset(skip).limit(limit)).all()
+    return refeicoes
+
+def get_refeicao(*, session: Session, refeicao_id: str):
+    refeicao = session.get(Refeicao, refeicao_id)
+    # statement = select(Refeicao).where(Refeicao.id == id)
+    return refeicao
+
+def update_refeicao(*, session: Session, refeicao_id: str, refeicao: Refeicao):
+    db_refeicao = session.get(Refeicao, refeicao_id)
+    
+    for key, value in refeicao.dict(exclude_unset=True).items():
+        setattr(db_refeicao, key, value)
+    session.add(db_refeicao)
+    session.commit()
+    session.refresh(db_refeicao)
+    return db_refeicao
+
+def delete_refeicao(*, session: Session, refeicao_id: str):
+    refeicao = session.get(Refeicao, refeicao_id)
+    session.delete(refeicao)
+    session.commit()
+    return {"ok": True}
+
+
+
+def create_dieta(*, session: Session, dieta_create: Dieta):
+    db_obj = Dieta.model_validate(
+        dieta_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def index_dietas(*, session: Session, skip: int = 0, limit: int = 10):
+    dietas = session.exec(select(Dieta).offset(skip).limit(limit)).all()
+    return dietas
+
+def get_dieta(*, session: Session, dieta_id: str):
+    dieta = session.get(Dieta, dieta_id)
+    return dieta
+
+def update_dieta(*, session: Session, dieta_id: str, dieta: Dieta):
+    db_dieta = session.get(Dieta, dieta_id)
+    for key, value in dieta.dict(exclude_unset=True).items():
+        setattr(db_dieta, key, value)
+    session.add(db_dieta)
+    session.commit()
+    session.refresh(db_dieta)
+    return db_dieta
+
+def delete_dieta(*, session: Session, dieta_id: str):
+    dieta = session.get(Dieta, dieta_id)
+    session.delete(dieta)
+    session.commit()
+    return {"ok": True}
 # def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
 #     db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
 #     session.add(db_item)

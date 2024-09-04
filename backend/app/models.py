@@ -88,8 +88,8 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     hashed_password: str
-    # items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
+    # items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
@@ -131,6 +131,10 @@ class UsersPublic(SQLModel):
 #     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
 
 
+# Database model, database table inferred from class name
+class Item(ItemBase, table=True):
+    id: uuid.UUID = Field(default_factory=None, primary_key=True)
+    title: str = Field(max_length=255)
 # # Database model, database table inferred from class name
 # class Item(ItemBase, table=True):
 #     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -139,7 +143,6 @@ class UsersPublic(SQLModel):
 #         foreign_key="user.id", nullable=False, ondelete="CASCADE"
 #     )
 #     owner: User | None = Relationship(back_populates="items")
-
 
 # # Properties to return via API, id is always required
 # class ItemPublic(ItemBase):
@@ -172,6 +175,49 @@ class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
 
+##########LUCAS###########################
+
+class RefeicaoBase(SQLModel):
+    name: str | None = Field(default=None, max_length=255)
+    calorias: int | None = Field(default=None)
+
+class Refeicao(RefeicaoBase,table=True):
+    id: str = Field(default_factory=None, primary_key=True)
+    
+class RefeicaoCreate(RefeicaoBase):
+    id: str
+
+class RefeicaoPublic(Refeicao):
+    name: str
+    calorias: int
+
+class RefeicoesPublic(SQLModel):
+    data: list[RefeicaoPublic]
+    count: int
+
+class DietaBase(SQLModel):
+    id_ref_manha: str | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_tarde: str | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_noite: str | None = Field(default=None, foreign_key="refeicao.id")
+
+class Dieta(DietaBase,table=True):
+    id: str = Field(default_factory=None, primary_key=True)
+
+class DietaCreate(DietaBase):
+    id: str
+
+
+class DietaPublic(Dieta):
+    id: str
+    id_ref_manha: str
+    id_ref_tarde: str
+    id_ref_noite: str
+    
+class DietasPublic(SQLModel):
+    data: list[DietaPublic]
+    count: int
+
+=======
 class PlanoBase(SQLModel):
     id: int | None = Field(default_factory=None, primary_key=True)
     id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id")

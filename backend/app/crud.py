@@ -142,8 +142,8 @@ def get_refeicoes(*, session: Session, skip: int = 0, limit: int = 10):
     refeicoes = session.exec(select(statement).offset(skip).limit(limit)).all()
     return refeicoes
 
-def get_refeicao(*, session: Session, refeicao_id: str):
-    refeicao = session.get(Refeicao, refeicao_id)
+def get_refeicao(*, session: Session, id: str):
+    refeicao = session.get(Refeicao, id)
     # statement = select(Refeicao).where(Refeicao.id == id)
     return refeicao
 
@@ -178,8 +178,8 @@ def index_dietas(*, session: Session, skip: int = 0, limit: int = 10):
     dietas = session.exec(select(Dieta).offset(skip).limit(limit)).all()
     return dietas
 
-def get_dieta(*, session: Session, dieta_id: str):
-    dieta = session.get(Dieta, dieta_id)
+def get_dieta(*, session: Session, id: str):
+    dieta = session.get(Dieta, id)
     return dieta
 
 def update_dieta(*, session: Session, dieta_id: str, dieta: Dieta):

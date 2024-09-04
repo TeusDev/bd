@@ -14,57 +14,59 @@ import secrets
 import string
 from .nome_gen import choose_name
 import random
-from .utils import especialidades, random_datetime,start_date,end_date
+from .utils import (
+    especialidades, 
+    random_datetime,
+    start_date,
+    end_date,
+    diet_meals
+)
+    
 # cpf and telefone
 N = 11
 
 def test_create_refeicao(db: Session) -> None:
     for i in range(50):
-        data_avaliacao = random_datetime(start_date, end_date)
-        peso         = round(random.uniform(40.0, 170.0),2)
-        altura       = round(random.uniform(1.3,2.2),2)
-        perc_gordura = round(random.uniform(4.0,30.0),2)
+        nome_dieta = random.choice(diet_meals)
+        calorias = random.randint(300,2000)
         id = random.randint(0,10000000)
-        avaliacao = AvaliacaoCreate(
+        refeicao = RefeicaoCreate(
             id=id,
-            data_avaliacao = data_avaliacao,
-            peso = peso,
-            altura = altura,
-            perc_gordura = perc_gordura
+            name=nome_dieta,
+            calorias=calorias
         )
         
-        existing_avaliacao = crud.get_avaliacoes(session=db,id=id)
-        if existing_avaliacao:
+        existing_ref = crud.get_refeicao(session=db,id=id)
+        if existing_ref:
             continue
         
-        aval = crud.create_avaliacao(session=db,avaliacao_create=avaliacao)
-        assert aval.data_avaliacao == data_avaliacao
-        assert aval.peso == peso
-        assert aval.altura == altura
-        assert aval.perc_gordura == perc_gordura
+        refeicoes = crud.create_refeicao(session=db,refeicao_create=refeicao)
+        assert refeicao.id == id
+        assert refeicao.name == nome_dieta
+        assert refeicao.calorias == calorias
 
 
 
-def test_get_treinador(db: Session) -> None:
+def test_get_refeicao(db: Session) -> None:
     for i in range(50):
-        data_avaliacao = random_datetime(start_date, end_date)
-        peso         = round(random.uniform(40.0, 170.0),2)
-        altura       = round(random.uniform(1.3,2.2),2)
-        perc_gordura = round(random.uniform(4.0,30.0),2)
+        nome_dieta = random.choice(diet_meals)
+        calorias = random.randint(300,2000)
         id = random.randint(0,10000000)
-        avaliacao = AvaliacaoCreate(
-           id=id,
-           data_avaliacao = data_avaliacao,
-           peso = peso,
-           altura = altura,
-           perc_gordura = perc_gordura)
+        refeicao = RefeicaoCreate(
+            id=id,
+            name=nome_dieta,
+            calorias=calorias
+        )
         
-        existing_avaliacao = crud.get_avaliacoes(session=db,id=id)
-        if existing_avaliacao:
+        existing_ref = crud.get_refeicao(session=db,id=id)
+        if existing_ref:
             continue
         
-        aval = crud.create_avaliacao(session=db,avaliacao_create=avaliacao)
-        
-        existing_avaliacao2 = crud.get_avaliacoes(session=db,id=id)
-        assert existing_avaliacao2
+        refeicoes = crud.create_refeicao(session=db,refeicao_create=refeicao)
+        assert refeicao.id == id
+        assert refeicao.name == nome_dieta
+        assert refeicao.calorias == calorias
+        existing_ref2 = crud.get_refeicao(session=db,id=id)
+        assert existing_ref2
+
 

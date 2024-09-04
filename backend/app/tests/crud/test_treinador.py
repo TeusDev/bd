@@ -20,6 +20,9 @@ def test_create_treinador(db: Session) -> None:
         telefone = ''.join(secrets.choice(string.digits) for i in range(N))
         treinador_id = ''.join(secrets.choice(string.digits) for i in range(N))
         telefone_in = TelefoneCreate(telefone=telefone)
+        existing_telefone = crud.get_telefones(session=db, telefone=telefone)
+        if existing_telefone:
+            continue
         telefonek = crud.create_telefone(session=db, telefone_create=telefone_in)
         name = choose_name()
         especialidade = random.choice(especialidades)
@@ -29,6 +32,9 @@ def test_create_treinador(db: Session) -> None:
             name = name,
             especialidade = especialidade
             )
+        existing_treinador = crud.get_treinadores(session=db,telefone=telefone)
+        if existing_treinador:
+            continue
         treinadork = crud.create_treinador(session=db, treinador_create=treinador_in)
         # assert treinadork.id == treinador_id
         assert treinadork.telefone == telefone
@@ -43,6 +49,9 @@ def test_get_treinador(db: Session) -> None:
                     for i in range(N))
         treinador_id = ''.join(secrets.choice(string.digits) for i in range(N))
         telefone_in = TelefoneCreate(telefone=telefone)
+        existing_telefone = crud.get_telefones(session=db, telefone=telefone)
+        if existing_telefone:
+            continue
         telefonek = crud.create_telefone(session=db, telefone_create=telefone_in)
         name = choose_name()
         especialidade = random.choice(especialidades)
@@ -52,6 +61,9 @@ def test_get_treinador(db: Session) -> None:
             name = name,
             especialidade = especialidade
             )
+        existing_treinador = crud.get_treinadores(session=db,telefone=telefone)
+        if existing_treinador:
+            continue
         treinadork = crud.create_treinador(session=db, treinador_create=treinador_in)
         existing_treinador = crud.get_treinadores(session=db,telefone=telefone)
         assert existing_treinador

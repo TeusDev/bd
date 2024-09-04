@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from app.api.routes import (
     login,
     refeicao,
-    dieta
+    dieta,
     users, 
     utils, 
     telefones,

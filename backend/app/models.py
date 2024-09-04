@@ -132,9 +132,9 @@ class UsersPublic(SQLModel):
 
 
 # Database model, database table inferred from class name
-class Item(ItemBase, table=True):
-    id: uuid.UUID = Field(default_factory=None, primary_key=True)
-    title: str = Field(max_length=255)
+# class Item(ItemBase, table=True):
+    # id: uuid.UUID = Field(default_factory=None, primary_key=True)
+    # title: str = Field(max_length=255)
 # # Database model, database table inferred from class name
 # class Item(ItemBase, table=True):
 #     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -217,7 +217,6 @@ class DietasPublic(SQLModel):
     data: list[DietaPublic]
     count: int
 
-=======
 class PlanoBase(SQLModel):
     id: int | None = Field(default_factory=None, primary_key=True)
     id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id")

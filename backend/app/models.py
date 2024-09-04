@@ -182,10 +182,10 @@ class RefeicaoBase(SQLModel):
     calorias: int | None = Field(default=None)
 
 class Refeicao(RefeicaoBase,table=True):
-    id: str = Field(default_factory=None, primary_key=True)
+    id: int = Field(default_factory=None, primary_key=True)
     
 class RefeicaoCreate(RefeicaoBase):
-    id: str
+    id: int
 
 class RefeicaoPublic(Refeicao):
     name: str
@@ -196,22 +196,22 @@ class RefeicoesPublic(SQLModel):
     count: int
 
 class DietaBase(SQLModel):
-    id_ref_manha: str | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_tarde: str | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_noite: str | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_manha: int | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_tarde: int | None = Field(default=None, foreign_key="refeicao.id")
+    id_ref_noite: int | None = Field(default=None, foreign_key="refeicao.id")
 
 class Dieta(DietaBase,table=True):
-    id: str = Field(default_factory=None, primary_key=True)
+    id: int = Field(default_factory=None, primary_key=True)
 
 class DietaCreate(DietaBase):
-    id: str
+    id: int
 
 
 class DietaPublic(Dieta):
-    id: str
-    id_ref_manha: str
-    id_ref_tarde: str
-    id_ref_noite: str
+    id: int
+    id_ref_manha: int
+    id_ref_tarde: int
+    id_ref_noite: int
     
 class DietasPublic(SQLModel):
     data: list[DietaPublic]

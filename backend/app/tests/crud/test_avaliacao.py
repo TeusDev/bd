@@ -16,9 +16,9 @@ N = 11
 def test_create_avaliacao(db: Session) -> None:
     for i in range(50):
         data_avaliacao = random_datetime(start_date, end_date)
-        peso = random.uniform(40.0, 170.0)
-        altura = random.uniform(1.3,2.2)
-        perc_gordura = random.uniform(4.0,30.0)
+        peso         = round(random.uniform(40.0, 170.0),2)
+        altura       = round(random.uniform(1.3,2.2),2)
+        perc_gordura = round(random.uniform(4.0,30.0),2)
         id = random.randint(0,10000000)
         avaliacao = AvaliacaoCreate(
             id=id,
@@ -43,9 +43,9 @@ def test_create_avaliacao(db: Session) -> None:
 def test_get_treinador(db: Session) -> None:
     for i in range(50):
         data_avaliacao = random_datetime(start_date, end_date)
-        peso = random.uniform(40.0, 170.0)
-        altura = random.uniform(1.3,2.2)
-        perc_gordura = random.uniform(4.0,30.0)
+        peso         = round(random.uniform(40.0, 170.0),2)
+        altura       = round(random.uniform(1.3,2.2),2)
+        perc_gordura = round(random.uniform(4.0,30.0),2)
         id = random.randint(0,10000000)
         avaliacao = AvaliacaoCreate(
            id=id,

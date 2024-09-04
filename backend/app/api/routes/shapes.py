@@ -44,16 +44,14 @@ async def create_upload_file(
     session.commit()
     session.refresh(new_shape)
 
-    # Return the ShapePublic model with base64-encoded image
     return ShapePublic.from_orm(new_shape)
 
 @router.get("/shapes/{shape_id}/foto")
-async def get_foto( session: SessionDep,
-    nome_foto: str):
-    # Fetch the shape by ID
-    shape = select(Shape).where(Shape.nome_foto==nome_foto)
+async def get_foto(session: SessionDep, nome_foto: str):
+    result = session.execute(select(Shape).where(Shape.nome_foto == nome_foto))
+    shape = result.scalars().first()
+
     if not shape or not shape.foto:
         raise HTTPException(status_code=404, detail="Shape or photo not found")
 
-    # Create a streaming response with the image content
     return StreamingResponse(io.BytesIO(shape.foto), media_type="image/png")

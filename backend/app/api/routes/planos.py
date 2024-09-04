@@ -1,13 +1,43 @@
-# import uuid
-# from typing import Any
+import uuid
+from typing import Any
 
-# from fastapi import APIRouter, HTTPException
-# from sqlmodel import func, select
+from fastapi import APIRouter, HTTPException
+from sqlmodel import func, select
 
-# from app.api.deps import CurrentUser, SessionDep
-# from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
+from app.api.deps import CurrentUser, SessionDep
+from app.models import (
+    Plano,
+    PlanoBase,
+    PlanoCreate,
+    PlanosPublic,
+    PlanoUpdate,
+    PlanoPublic
+)
 
-# router = APIRouter()
+router = APIRouter()
+
+@router.get("/",response_model=PlanosPublic)
+def read_planos ( session: SessionDep, skip: int = 0, limit: int = 100
+) -> Any:
+    count_statement = select(func.count()).select_from(Plano)
+    count = session.exec(count_statement).one()
+    statement = select(Plano).offset(skip).limit(limit)
+    planos = session.exec(statement).all()
+    return PlanosPublic(data=planos,count=count)
+
+
+@router.post("/", response_model=PlanoPublic)
+def create_planos(
+    *, session: SessionDep, current_user: CurrentUser, plano_in: PlanoCreate
+) -> Any:
+    """
+    Create new plano.
+    """
+    plano = Plano.model_validate(plano_in)
+    session.add(plano)
+    session.commit()
+    session.refresh(plano)
+    return plano
 
 # @router.get("/", response_model=ItemsPublic)
 # def read_items(

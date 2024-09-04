@@ -4,10 +4,60 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import *
 
-from fastapi import FastAPI, HTTPException, Depends
-from typing import List
+from app.models import (
+    # Item, 
+    # ItemCreate, 
+    User, 
+    UserCreate, 
+    UserUpdate, 
+    Telefone, 
+    TelefoneCreate,
+    TreinadorCreate,
+    Treinador,
+    Avaliacao,
+    AvaliacaoCreate,
+    AvaliacaoUpdate,
+    Plano,
+    PlanoCreate,
+    PlanoUpdate
+)
+
+def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Telefone:
+    db_obj = Telefone.model_validate(
+        telefone_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def create_avaliacao(*,session:Session,avaliacao_create:AvaliacaoCreate) -> Avaliacao:
+    db_obj = Avaliacao.model_validate(
+        avaliacao_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def create_plano(*,session:Session,plano_create:PlanoCreate) -> Plano:
+    db_obj = Plano.model_validate(
+        plano_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def create_treinador(*, session: Session, treinador_create: TreinadorCreate) -> Treinador:
+    db_obj = Treinador.model_validate(
+        treinador_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     db_obj = User.model_validate(
@@ -33,11 +83,27 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
     return db_user
 
 
+
+
 def get_user_by_email(*, session: Session, email: str) -> User | None:
     statement = select(User).where(User.email == email)
     session_user = session.exec(statement).first()
     return session_user
 
+def get_telefones(*, session: Session, telefone: str) -> Telefone | None:
+    statement = select(Telefone).where(Telefone.telefone == telefone)
+    telefones = session.exec(statement).first()
+    return telefones
+
+def get_treinadores(*, session: Session, telefone: str) -> Treinador | None:
+    statement = select(Treinador).where(Treinador.telefone == telefone)
+    treinadores = session.exec(statement).first()
+    return treinadores
+
+def get_avaliacoes(*, session: Session, id: int) -> Avaliacao | None:
+    statement = select(Avaliacao).where(Avaliacao.id == id)
+    avaliacoes = session.exec(statement).first()
+    return avaliacoes
 
 def authenticate(*, session: Session, email: str, password: str) -> User | None:
     db_user = get_user_by_email(session=session, email=email)
@@ -126,3 +192,9 @@ def delete_dieta(*, session: Session, dieta_id: str):
     session.delete(dieta)
     session.commit()
     return {"ok": True}
+# def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
+#     db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
+#     session.add(db_item)
+#     session.commit()
+#     session.refresh(db_item)
+#     return db_item

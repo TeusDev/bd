@@ -16,7 +16,8 @@ from app.models import (
     Dieta,
     DietaCreate,
     DietaPublic,
-    DietasPublic
+    DietasPublic,
+    DietaUpdate
 )
 from app.utils import generate_new_account_email, send_email
 
@@ -57,4 +58,59 @@ def create_dieta(*, session: SessionDep, dieta_in: DietaCreate) -> Any:
         )
 
     dieta = crud.create_dieta(session=session, dieta_create=dieta_in)
+    return dieta
+
+@router.get(
+        "/{dieta_id}",
+        response_model=DietaPublic)
+def get_dieta(*, session: SessionDep, dieta_id: int):
+    """
+    Retrieve a single dieta by ID.
+    """
+    dieta = crud.get_dieta(session, dieta_id=dieta_id)
+    if not dieta:
+        raise HTTPException(
+            status_code=404,
+            detail="Dieta not found."
+        )
+    return dieta
+
+@router.put(
+        "/{dieta_id}",
+        response_model=DietaPublic
+)
+def update_dieta(*, session: SessionDep, dieta_id: int, dieta_in: DietaUpdate) -> Any:
+    """
+    Update a dieta by ID.
+    """
+    dieta = crud.get_dieta(session=session, dieta_id=dieta_id)
+    if not dieta:
+        raise HTTPException(
+            status_code=404,
+            detail="Dieta not found.",
+        )
+
+    dieta = crud.update_dieta(
+        session=session, 
+        dieta_id=dieta_id, 
+        dieta=dieta_in
+    )
+    return dieta
+
+@router.delete(
+        "/{dieta_id}",
+        response_model=DietaPublic
+)
+def delete_dieta(*, session: SessionDep, dieta_id: int) -> Any:
+    """
+    Delete a dieta by ID.
+    """
+    dieta = crud.get_dieta(session=session, dieta_id=dieta_id)
+    if not dieta:
+        raise HTTPException(
+            status_code=404,
+            detail="Dieta not found.",
+        )
+
+    crud.delete_dieta(session=session, dieta_id=dieta_id)
     return dieta

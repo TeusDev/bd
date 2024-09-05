@@ -187,6 +187,9 @@ class Refeicao(RefeicaoBase,table=True):
 class RefeicaoCreate(RefeicaoBase):
     id: int
 
+class RefeicaoUpdate(RefeicaoBase):
+    pass
+
 class RefeicaoPublic(Refeicao):
     name: str
     calorias: int
@@ -205,6 +208,9 @@ class Dieta(DietaBase,table=True):
 
 class DietaCreate(DietaBase):
     id: int
+
+class DietaUpdate(DietaBase):
+    pass
 
 
 class DietaPublic(Dieta):

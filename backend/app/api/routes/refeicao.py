@@ -16,7 +16,8 @@ from app.models import (
     Refeicao,
     RefeicaoCreate,
     RefeicaoPublic,
-    RefeicoesPublic
+    RefeicoesPublic,
+    RefeicaoUpdate
 )
 from app.utils import generate_new_account_email, send_email
 
@@ -27,7 +28,7 @@ router = APIRouter()
     "/",
     response_model=RefeicoesPublic,
 )
-def read_refeicoes(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+def read_refeicoes(*, session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
     Retrieve refeicoes.
     """
@@ -42,7 +43,8 @@ def read_refeicoes(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 
 @router.post(
-    "/",response_model=RefeicaoPublic
+    "/",
+    response_model=RefeicaoPublic
 )
 def create_refeicao(*, session: SessionDep, refeicao_in: RefeicaoCreate) -> Any:
     """
@@ -57,3 +59,59 @@ def create_refeicao(*, session: SessionDep, refeicao_in: RefeicaoCreate) -> Any:
 
     refeicao = crud.create_refeicao(session=session, refeicao_create=refeicao_in)
     return refeicao
+
+@router.get(
+        "/{refeicao_id}",
+        response_model=RefeicaoPublic)
+def get_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
+    """
+    Delete a refeicao by ID.
+    """
+    refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
+    if not refeicao:
+        raise HTTPException(
+            status_code=404,
+            detail="Refeicao not found.",
+        )
+    return refeicao
+
+@router.put(
+        "/{refeicao_id}",
+        response_model=RefeicaoPublic
+)
+def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: RefeicaoUpdate) -> Any:
+    """
+    Update a refeicao by ID.
+    """
+    refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
+    if not refeicao:
+        raise HTTPException(
+            status_code=404,
+            detail="Refeicao not found.",
+        )
+
+    refeicao = crud.update_refeicao(
+        session=session, 
+        refeicao_id=refeicao_id, 
+        refeicao=refeicao_in
+    )
+    return refeicao
+
+# TODO: INTEGRITY VIOLATION: IF WE DELETE REFEICAO WE HAVE TO DELETE REFEICOES BASED ON THIS ONE
+# @router.delete(
+#         "/{refeicao_id}",
+#         response_model=RefeicaoPublic
+# )
+# def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
+#     """
+#     Delete a refeicao by ID.
+#     """
+#     refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
+#     if not refeicao:
+#         raise HTTPException(
+#             status_code=404,
+#             detail="Refeicao not found.",
+#         )
+
+#     crud.delete_refeicao(session=session, refeicao_id=refeicao_id)
+#     return refeicao

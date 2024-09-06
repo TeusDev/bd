@@ -198,6 +198,67 @@ class RefeicoesPublic(SQLModel):
     data: list[RefeicaoPublic]
     count: int
 
+class ExercicioBase(SQLModel):
+    exercicio: str = Field(default_factory=None)
+    
+class Exercicio(ExercicioBase, table=True):
+    id: int = Field(default_factory=None, primary_key=True)
+
+class ExercicioCreate(ExercicioBase):
+    id: int = Field(default_factory=None, primary_key=True)
+
+class ExercicioPublic(Exercicio):
+    id: int
+    exercicio: str
+    
+
+class ExerciciosPublic(SQLModel):
+    data: list[ExercicioPublic]
+    count: int
+    
+class TreinoBase(SQLModel):
+    id_exercicio: int = Field(default=None, foreign_key="exercicio.id")
+    grupo_muscular: str = Field(default=None)
+
+class Treino(TreinoBase,table=True):
+    id: int = Field(default_factory=None, primary_key=True)
+
+class TreinoCreate(TreinoBase):
+    id: int = Field(default_factory=None, primary_key=True)
+
+
+class TreinoPublic(Treino):
+    id: int
+    id_exercicio: int
+    grupo_muscular: str
+
+
+class TreinosPublic(SQLModel):
+    data: list[TreinoPublic]
+    count: int
+    
+
+class SessaoBase(SQLModel):
+    id_treino: int = Field(default=None, foreign_key="treino.id")
+    data: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
+    duracao_minutos: int = Field(default=None)
+    
+class Sessao(SessaoBase,table=True):
+    id: int = Field(default_factory=None, primary_key=True)
+
+class SessaoCreate(SessaoBase):
+    id: int = Field(default_factory=None, primary_key=True)
+
+
+class SessaoPublic(Sessao):
+    id: int
+    id_treino: int
+    data: datetime.datetime 
+    duracao_minutos: int 
+class SessoesPublic(SQLModel):
+    data: list[SessaoPublic]
+    count: int
+
 class DietaBase(SQLModel):
     id_ref_manha: int | None = Field(default=None, foreign_key="refeicao.id")
     id_ref_tarde: int | None = Field(default=None, foreign_key="refeicao.id")

@@ -24,7 +24,13 @@ from app.models import (
     AvaliacaoUpdate,
     Plano,
     PlanoCreate,
-    PlanoUpdate
+    PlanoUpdate,
+    Exercicio,
+    ExercicioCreate,
+    Sessao,
+    SessaoCreate,
+    Treino,
+    TreinoCreate
 )
 
 def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Telefone:
@@ -35,6 +41,34 @@ def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Tel
     session.commit()
     session.refresh(db_obj)
     return db_obj
+
+def create_exercicio(*, session: Session, exercicio_create: ExercicioCreate) -> Exercicio:
+    db_obj = Exercicio.model_validate(
+        exercicio_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def create_treino(*, session: Session, treino_create: TreinoCreate) -> Treino:
+    db_obj = Treino.model_validate(
+        treino_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+def create_sessao(*, session: Session, sessao_create: SessaoCreate) -> Sessao:
+    db_obj = Sessao.model_validate(
+        sessao_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
 
 def create_avaliacao(*,session:Session,avaliacao_create:AvaliacaoCreate) -> Avaliacao:
     db_obj = Avaliacao.model_validate(
@@ -93,6 +127,21 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
     statement = select(User).where(User.email == email)
     session_user = session.exec(statement).first()
     return session_user
+
+def get_exercicios(*, session: Session, id: int) -> Exercicio | None:
+    statement = select(Exercicio).where(Exercicio.id == id)
+    exercicios = session.exec(statement).first()
+    return exercicios
+
+def get_treinos(*, session: Session, id: int) -> Treino | None:
+    statement = select(Treino).where(Treino.id == id)
+    treinos = session.exec(statement).first()
+    return treinos
+
+def get_sessoes(*, session: Session, id: int) -> Sessao | None:
+    statement = select(Sessao).where(Sessao.id == id)
+    sessoes = session.exec(statement).first()
+    return sessoes
 
 def get_telefones(*, session: Session, telefone: str) -> Telefone | None:
     statement = select(Telefone).where(Telefone.telefone == telefone)

@@ -159,6 +159,7 @@ def update_refeicao(*, session: Session, refeicao_id: str, refeicao: Refeicao):
 
 def delete_refeicao(*, session: Session, refeicao_id: str):
     refeicao = session.get(Refeicao, refeicao_id)
+    nullify_dieta_references(refeicao_id)
     session.delete(refeicao)
     session.commit()
     return {"ok": True}
@@ -190,6 +191,28 @@ def update_dieta(*, session: Session, dieta_id: str, dieta: Dieta):
     session.commit()
     session.refresh(db_dieta)
     return db_dieta
+
+def nullify_dieta_references(*, session: Session, refeicao_id: int) -> None:
+    """
+    Set dieta references to NULL where refeicao is being deleted.
+    """
+    # Atualiza as dietas que têm a refeição como referência para NULL
+    session.exec(
+        update_dieta(Dieta)
+        .where(Dieta.id_ref_manha == refeicao_id)
+        .values(id_ref_manha=None)
+    )
+    session.exec(
+        update_dieta(Dieta)
+        .where(Dieta.id_ref_tarde == refeicao_id)
+        .values(id_ref_tarde=None)
+    )
+    session.exec(
+        update_dieta(Dieta)
+        .where(Dieta.id_ref_noite == refeicao_id)
+        .values(id_ref_noite=None)
+    )
+    session.commit()
 
 def delete_dieta(*, session: Session, dieta_id: str):
     dieta = session.get(Dieta, dieta_id)

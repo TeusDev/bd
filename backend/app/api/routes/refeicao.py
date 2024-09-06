@@ -97,21 +97,20 @@ def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: Refei
     )
     return refeicao
 
-# TODO: INTEGRITY VIOLATION: IF WE DELETE REFEICAO WE HAVE TO DELETE REFEICOES BASED ON THIS ONE
-# @router.delete(
-#         "/{refeicao_id}",
-#         response_model=RefeicaoPublic
-# )
-# def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
-#     """
-#     Delete a refeicao by ID.
-#     """
-#     refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
-#     if not refeicao:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="Refeicao not found.",
-#         )
+@router.delete(
+        "/{refeicao_id}",
+        response_model=RefeicaoPublic
+)
+def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
+    """
+    Delete a refeicao by ID.
+    """
+    refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
+    if not refeicao:
+        raise HTTPException(
+            status_code=404,
+            detail="Refeicao not found.",
+        )
 
-#     crud.delete_refeicao(session=session, refeicao_id=refeicao_id)
-#     return refeicao
+    crud.delete_refeicao(session=session, refeicao_id=refeicao_id)
+    return refeicao

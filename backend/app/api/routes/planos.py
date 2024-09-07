@@ -37,8 +37,7 @@ def create_planos(
     """
     avaliacao = get_avaliacao(session=session,id=plano_in.id_avaliacao)
     calorias = calculate_calories(avaliacao=avaliacao)
-    # plano = Plano.model_validate(plano_in)
-     # Call the stored procedure
+
     procedure_call = text("""
         SELECT id_dieta
         FROM get_dieta_by_max_calories(:calories)

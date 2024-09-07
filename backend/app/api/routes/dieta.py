@@ -136,7 +136,7 @@ def create_dieta(*, session: SessionDep, dieta_in: DietaCreate,
     WHERE 
         dieta.id = :dieta_id
     LIMIT :limit OFFSET :skip
-""")
+    """)
     result = session.execute(
     sql_query,
     {"dieta_id": dieta_in.id, "limit": 1, "skip": 0}
@@ -160,13 +160,48 @@ def get_dieta(*, session: SessionDep, dieta_id: int):
     """
     Retrieve a single dieta by ID.
     """
-    dieta = crud.get_dieta(session, dieta_id=dieta_id)
-    if not dieta:
+    # dieta = crud.get_dieta(session, dieta_id=dieta_id)
+    sql_query = text("""
+    SELECT 
+        dieta_id AS id_dieta,
+        r_manha.name AS nome_ref_manha,
+        r_tarde.name AS nome_ref_tarde,
+        r_noite.name AS nome_ref_noite
+    FROM 
+        dieta
+    LEFT JOIN 
+        dieta_refeicoes ON dieta_id = dieta_refeicoes.id_dieta
+    LEFT JOIN 
+        refeicao AS r_manha ON dieta_refeicoes.id_ref_manha = r_manha.id
+    LEFT JOIN 
+        refeicao AS r_tarde ON dieta_refeicoes.id_ref_tarde = r_tarde.id
+    LEFT JOIN 
+        refeicao AS r_noite ON dieta_refeicoes.id_ref_noite = r_noite.id
+    WHERE 
+        dieta_id = :dieta_id
+    LIMIT :limit OFFSET :skip
+    """)
+    result = session.execute(
+    sql_query,
+    {"dieta_id": dieta_id, "limit": 1, "skip": 0}
+    )
+    
+    dietas = [
+        DietaPublic(
+            id=row[0],
+            nome_ref_manha=row[1],
+            nome_ref_tarde=row[2],
+            nome_ref_noite=row[3]
+        )
+        for row in result
+    ]
+    dieta_public = dietas[0]
+    if not dieta_public:
         raise HTTPException(
             status_code=404,
             detail="Dieta not found."
-        )
-    return dieta
+    )
+    return dieta_public
 
 @router.put(
         "/{dieta_id}",
@@ -176,19 +211,60 @@ def update_dieta(*, session: SessionDep, dieta_id: int, dieta_in: DietaUpdate) -
     """
     Update a dieta by ID.
     """
-    dieta = crud.get_dieta(session=session, dieta_id=dieta_id)
+    dieta = crud.get_dieta(session=session, dieta_id=dieta_in.id)
     if not dieta:
         raise HTTPException(
             status_code=404,
             detail="Dieta not found.",
-        )
-
-    dieta = crud.update_dieta(
-        session=session, 
-        dieta_id=dieta_id, 
-        dieta=dieta_in
     )
-    return dieta
+
+    sql_query = text("""
+    UPDATE dieta_refeicoes
+    SET 
+        id_ref_manha = dieta_in.id_ref_manha,
+        id_ref_tarde = dieta_in.id_ref_tarde,
+        id_ref_noite = dieta_in.id_ref_noite
+    WHERE 
+        id_dieta = :dieta_id;
+    """)
+    result = session.execute(sql_query)
+
+    sql_query = text("""
+    SELECT 
+        dieta_id AS id_dieta,
+        r_manha.name AS nome_ref_manha,
+        r_tarde.name AS nome_ref_tarde,
+        r_noite.name AS nome_ref_noite
+    FROM 
+        dieta
+    LEFT JOIN 
+        dieta_refeicoes ON dieta_id = dieta_refeicoes.id_dieta
+    LEFT JOIN 
+        refeicao AS r_manha ON dieta_refeicoes.id_ref_manha = r_manha.id
+    LEFT JOIN 
+        refeicao AS r_tarde ON dieta_refeicoes.id_ref_tarde = r_tarde.id
+    LEFT JOIN 
+        refeicao AS r_noite ON dieta_refeicoes.id_ref_noite = r_noite.id
+    WHERE 
+        dieta_id = :dieta_id
+    LIMIT :limit OFFSET :skip
+    """)
+    result = session.execute(
+    sql_query,
+    {"dieta_id": dieta_id, "limit": 1, "skip": 0}
+    )
+    
+    dietas = [
+        DietaPublic(
+            id=row[0],
+            nome_ref_manha=row[1],
+            nome_ref_tarde=row[2],
+            nome_ref_noite=row[3]
+        )
+        for row in result
+    ]
+    dieta_public = dietas[0]
+    return dieta_public
 
 @router.delete(
         "/{dieta_id}",
@@ -203,7 +279,7 @@ def delete_dieta(*, session: SessionDep, dieta_id: int) -> Any:
         raise HTTPException(
             status_code=404,
             detail="Dieta not found.",
-        )
+    )
 
     crud.delete_dieta(session=session, dieta_id=dieta_id)
     return dieta

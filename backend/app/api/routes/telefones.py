@@ -65,7 +65,7 @@ def create_telefone(*, session: SessionDep, telefone_in: TelefoneCreate) -> Any:
             detail="The telefone with this line already exists in the system.",
         )
 
-    pattern = r"\d{11}"
+    pattern = r"\d{8}"
     is_valid = bool(re.match(pattern,telefone_in.telefone))
     if (not is_valid):
         raise HTTPException(

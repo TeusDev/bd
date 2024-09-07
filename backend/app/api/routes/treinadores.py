@@ -34,7 +34,7 @@ from app.models import (
     TreinadorUpdate
 )
 from app.utils import generate_new_account_email, send_email
-
+from .telefones import create_telefone
 router = APIRouter()
 
 
@@ -116,26 +116,68 @@ def read_treinadores_especialidade(session: SessionDep, especialidade:str,skip: 
 @router.post(
     "/",response_model=TreinadorPublic
 )
-def create_treinadores(*, session: SessionDep, treinador_in: TreinadorCreate) -> Any:
+def create_treinadores(*, session: SessionDep, treinador_in: TreinadorCreate,telefone:str) -> Any:
     """
     Create new treinador.
     """
-    pattern = r"\d{11}"
-    is_valid = bool(re.match(pattern,treinador_in.telefone))
+    pattern = r"\d{8}"
+    is_valid = bool(re.match(pattern,telefone))
     if (not is_valid):
         raise HTTPException(
             status_code=400,
             detail="The telefone with this format is not valid.",
         )
-    treinador = crud.get_treinadores(session=session, telefone=treinador_in.telefone)
+        
+    telefone_in = crud.get_telefones(session=session,telefone=telefone)
+    if not telefone_in:
+        raise HTTPException(
+            status_code=400,
+            detail="The telefone with this line doesnt exists in the system.",
+        )
+    treinador = crud.get_treinadores(session=session, telefone=telefone)
     if treinador:
         raise HTTPException(
             status_code=400,
             detail="The treinador with this line already exists in the system.",
         )
 
-    treinador = crud.create_treinador(session=session, treinador_create=treinador_in)
-    return treinador
+    treinador = crud.create_treinador(session=session, 
+                                      treinador_create=treinador_in,
+                                      telefone=telefone
+                                      )
+    
+    sql_query = text("""
+    SELECT 
+        treinador.id,
+        treinador.name ,
+        treinador.especialidade,
+        telefonez.telefone as telefones 
+            
+    FROM 
+        treinador
+    INNER JOIN 
+        treinador_telefones ON treinador.id = treinador_telefones.treinador_id
+    INNER JOIN 
+        telefone AS telefonez ON treinador_telefones.telefone_id = telefonez.telefone
+    WHERE 
+        treinador.id = :treinador_id
+    LIMIT :limit OFFSET :skip
+    """)
+    result = session.execute(
+    sql_query,
+    {"treinador_id": treinador_in.id, "limit": 1, "skip": 0}
+)
+    treinador = [
+        TreinadorPublic(
+            id=row[0],
+            name=row[1],
+            especialidade=row[2],
+            telefone=row[3]
+        )
+        for row in result
+    ]
+    treinadorz = treinador[0]
+    return treinadorz
 
 
 @router.delete("/{telefone}")

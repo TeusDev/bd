@@ -41,7 +41,7 @@ class TreinadoresPublic(SQLModel):
     data: list[TreinadorPublic]
     count: int
     
-class TreinadorCreate(TreinadorBase):
+class TreinadorCreate(SQLModel):
     id: str = Field(default=None, primary_key=True,max_length=11)
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
@@ -274,9 +274,10 @@ class SessaoCreate(SessaoBase):
 
 class SessaoPublic(Sessao):
     id: int
-    id_treino: int
+    e
     data: datetime.datetime 
-    duracao_minutos: int 
+    duracao_minutos: int
+    calorias_gastas: int
 class SessoesPublic(SQLModel):
     data: list[SessaoPublic]
     count: int
@@ -285,7 +286,7 @@ class treino_sessao(SQLModel,table=True):
     id_treino1: int = Field(default=None, foreign_key="treino.id",primary_key=True)
     id_treino2: int = Field(default=None, foreign_key="treino.id",primary_key=True)
     id_treino3: int = Field(default=None, foreign_key="treino.id",primary_key=True)
-    id_trei: int = Field(default=None, foreign_key="sessao.id",primary_key=True)
+    id_sessao: int = Field(default=None, foreign_key="sessao.id",primary_key=True)
 
 class DietaBase(SQLModel):
     id: int = Field(default_factory=None, primary_key=True)
@@ -296,7 +297,9 @@ class Dieta(DietaBase,table=True):
 class DietaCreate(DietaBase):
     id: int
 class DietaUpdate(DietaBase):
-    pass
+    id_ref_manha: Optional[int]
+    id_ref_tarde: Optional[int]
+    id_ref_noite: Optional[int]
 
 
 class DietaPublic(SQLModel):

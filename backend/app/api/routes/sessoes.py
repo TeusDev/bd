@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from sqlmodel import col, delete, func, select,text
 import re
 from app import crud
 from app.api.deps import (
@@ -27,6 +27,7 @@ from app.models import (
     TreinoCreate,
     TreinoPublic,
     TreinosPublic,
+    
     Message
 )
 from app.utils import generate_new_account_email, send_email
@@ -39,18 +40,45 @@ router = APIRouter()
     "/",
     response_model=SessoesPublic
 )
-def read_treinos(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+def read_sessoes(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
     Retrieve sessoes de treino.
     """
+    sql_query = text("""
+    SELECT 
+        sessao.id,
+        exercicio.name AS exercicio1,
+        exercicio.name AS exercicio2,
+        exercicio.name AS exercicio3,
+        calorias_gastas AS sum(treino1.calorias,treino2.calorias,treino3.calorias)
+    FROM 
+        sessao
+    LEFT JOIN 
+        dieta_refeicoes ON dieta.id = dieta_refeicoes.id_dieta
+    LEFT JOIN 
+        refeicao AS r_manha ON dieta_refeicoes.id_ref_manha = r_manha.id
+    LEFT JOIN 
+        refeicao AS r_tarde ON dieta_refeicoes.id_ref_tarde = r_tarde.id
+    LEFT JOIN 
+        refeicao AS r_noite ON dieta_refeicoes.id_ref_noite = r_noite.id
+    LIMIT :limit OFFSET :skip
+    """)
 
-    count_statement = select(func.count()).select_from(Sessao)
-    count = session.exec(count_statement).one()
+    results = session.execute(sql_query, {"limit": limit, "skip": skip}).all()
 
-    statement = select(Sessao).offset(skip).limit(limit)
-    sessoes = session.exec(statement).all()
+    dietas = [
+        SessaoPublic(
+            id=row[0],
+            nome_ref_manha=row[1],
+            nome_ref_tarde=row[2],
+            nome_ref_noite=row[3]
+        )
+        for row in results
+    ]
 
-    return SessoesPublic(data=sessoes, count=count)
+    # Criar e retornar a instância de DietasPublic
+    return DietasPublic(data=dietas, count=count)
+
 
 
 @router.post(

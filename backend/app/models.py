@@ -1,11 +1,22 @@
 import uuid
 from decimal import Decimal
-from pydantic import EmailStr
+from pydantic import EmailStr,BaseModel
 from sqlmodel import Field, Relationship, SQLModel,Session,create_engine,select
 import datetime
 from .cpf import generate_cpf
-from sqlalchemy import LargeBinary,Column
+from sqlalchemy import LargeBinary
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
 import base64
+from typing import TYPE_CHECKING, Optional,List
+
+
+class dieta_refeicoes(SQLModel,table=True):
+    id_dieta:     int = Field(default_factory=None, primary_key=True,foreign_key="dieta.id")
+    id_ref_manha: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id")
+    id_ref_tarde: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id")
+    id_ref_noite: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id")
 
 class TreinadorBase(SQLModel):
     telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
@@ -178,19 +189,26 @@ class NewPassword(SQLModel):
 ##########LUCAS###########################
 
 class RefeicaoBase(SQLModel):
-    name: str | None = Field(default=None, max_length=255)
-    calorias: int | None = Field(default=None)
+    name: str = Field(default=None, max_length=255)
+    calorias: int = Field(default=None)
 
-class Refeicao(RefeicaoBase,table=True):
-    id: int = Field(default_factory=None, primary_key=True)
+
+class Refeicao(RefeicaoBase, table=True):
+    id: int = Field(default=None, primary_key=True)
+
+    
+# Update forward references for the SQLModel
+Refeicao.update_forward_refs()
     
 class RefeicaoCreate(RefeicaoBase):
-    id: int
+    id: int = Field(default=None, primary_key=True)
+    name: str = Field(default=None, max_length=255)
+    calorias: int = Field(default=None)
 
 class RefeicaoUpdate(RefeicaoBase):
     pass
 
-class RefeicaoPublic(Refeicao):
+class RefeicaoPublic(RefeicaoBase):
     name: str
     calorias: int
 
@@ -260,25 +278,22 @@ class SessoesPublic(SQLModel):
     count: int
 
 class DietaBase(SQLModel):
-    id_ref_manha: int | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_tarde: int | None = Field(default=None, foreign_key="refeicao.id")
-    id_ref_noite: int | None = Field(default=None, foreign_key="refeicao.id")
+    id: int = Field(default_factory=None, primary_key=True)
 
 class Dieta(DietaBase,table=True):
     id: int = Field(default_factory=None, primary_key=True)
 
 class DietaCreate(DietaBase):
     id: int
-
 class DietaUpdate(DietaBase):
     pass
 
 
-class DietaPublic(Dieta):
-    id: int
-    id_ref_manha: int
-    id_ref_tarde: int
-    id_ref_noite: int
+class DietaPublic(SQLModel):
+    id: Optional[int]
+    nome_ref_manha: Optional[str]
+    nome_ref_tarde: Optional[str]
+    nome_ref_noite: Optional[str]
     
 class DietasPublic(SQLModel):
     data: list[DietaPublic]

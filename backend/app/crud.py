@@ -30,7 +30,8 @@ from app.models import (
     Sessao,
     SessaoCreate,
     Treino,
-    TreinoCreate
+    TreinoCreate,
+    dieta_refeicoes
 )
 
 def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Telefone:
@@ -191,12 +192,12 @@ def get_refeicoes(*, session: Session, skip: int = 0, limit: int = 10):
     refeicoes = session.exec(select(statement).offset(skip).limit(limit)).all()
     return refeicoes
 
-def get_refeicao(*, session: Session, id: str):
-    refeicao = session.get(Refeicao, id)
+def get_refeicao(*, session: Session, refeicao_id: int):
+    refeicao = session.get(Refeicao, refeicao_id)
     # statement = select(Refeicao).where(Refeicao.id == id)
     return refeicao
 
-def update_refeicao(*, session: Session, refeicao_id: str, refeicao: Refeicao):
+def update_refeicao(*, session: Session, refeicao_id: int, refeicao: Refeicao):
     db_refeicao = session.get(Refeicao, refeicao_id)
     
     for key, value in refeicao.dict(exclude_unset=True).items():
@@ -206,7 +207,7 @@ def update_refeicao(*, session: Session, refeicao_id: str, refeicao: Refeicao):
     session.refresh(db_refeicao)
     return db_refeicao
 
-def delete_refeicao(*, session: Session, refeicao_id: str):
+def delete_refeicao(*, session: Session, refeicao_id: int):
     refeicao = session.get(Refeicao, refeicao_id)
     nullify_dieta_references(refeicao_id)
     session.delete(refeicao)
@@ -214,16 +215,27 @@ def delete_refeicao(*, session: Session, refeicao_id: str):
     return {"ok": True}
 
 
-
-def create_dieta(*, session: Session, dieta_create: Dieta):
+def create_dieta(*, session: Session, dieta_create: Dieta, refeicoes_ids: list[int]) -> Dieta:
     db_obj = Dieta.model_validate(
         dieta_create
     )
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
-    return db_obj
 
+
+    # Create and add entries to the dieta_refeicoes table
+    dieta_ref = dieta_refeicoes(
+        id_dieta=db_obj.id,
+        id_ref_manha=refeicoes_ids[0],
+        id_ref_tarde=refeicoes_ids[1],
+        id_ref_noite=refeicoes_ids[2]
+    )
+    session.add(dieta_ref)
+    session.commit()
+
+    return db_obj
+    
 def index_dietas(*, session: Session, skip: int = 0, limit: int = 10):
     dietas = session.exec(select(Dieta).offset(skip).limit(limit)).all()
     return dietas

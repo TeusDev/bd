@@ -41,8 +41,6 @@ def read_dietas(session: SessionDep, skip: int = 0, limit: int = 100) -> DietasP
     """
     count_statement = select(func.count()).select_from(Dieta)
     count = session.exec(count_statement).one()
-
-    # Consulta principal
     
     sql_query = text("""
     SELECT 
@@ -63,9 +61,8 @@ def read_dietas(session: SessionDep, skip: int = 0, limit: int = 100) -> DietasP
     LIMIT :limit OFFSET :skip
     """)
 
-    # Executar a consulta com parâmetros
     results = session.execute(sql_query, {"limit": limit, "skip": skip}).all()
-    # Converter os resultados para instâncias de DietaPublic
+
     dietas = [
         DietaPublic(
             id=row[0],

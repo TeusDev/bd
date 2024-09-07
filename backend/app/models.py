@@ -32,18 +32,17 @@ class TreinadorUpdate(TreinadorBase):
 class Treinador(TreinadorBase, table=True):
     id: str = Field(default=None, primary_key=True,max_length=11)
 
-class TreinadorPublic(TreinadorBase):
-    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
-    name: str | None = Field(default=None, max_length=255)
-    especialidade: str | None = Field(default=None, max_length=255)
-
+class TreinadorPublic(SQLModel):
+    id: Optional[str]
+    name: Optional[str] 
+    especialidade: Optional[str]
+    telefone: Optional[str]
 class TreinadoresPublic(SQLModel):
     data: list[TreinadorPublic]
     count: int
     
 class TreinadorCreate(TreinadorBase):
     id: str = Field(default=None, primary_key=True,max_length=11)
-    telefone: str | None = Field(default=None, unique=True,max_length=11)
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
 class TelefoneBase(SQLModel):
@@ -54,6 +53,11 @@ class Telefone(TelefoneBase,table=True):
 
 class TelefoneCreate(TelefoneBase):
     telefone: str = Field(default=None, primary_key=True,max_length=11)
+
+class treinador_telefones(SQLModel,table=True):
+    treinador_id: str = Field(default=None, primary_key=True,max_length=11,foreign_key="treinador.id")
+    telefone_id: str = Field(default=None, primary_key=True,max_length=11 ,foreign_key="telefone.telefone")
+
 
 # Shared properties
 class UserBase(SQLModel):
@@ -209,6 +213,7 @@ class RefeicaoUpdate(RefeicaoBase):
     pass
 
 class RefeicaoPublic(RefeicaoBase):
+    id: int
     name: str
     calorias: int
 
@@ -218,7 +223,7 @@ class RefeicoesPublic(SQLModel):
 
 class ExercicioBase(SQLModel):
     exercicio: str = Field(default_factory=None)
-    
+    grupo_muscular: str | None = Field(default=None)
 class Exercicio(ExercicioBase, table=True):
     id: int = Field(default_factory=None, primary_key=True)
 
@@ -236,7 +241,6 @@ class ExerciciosPublic(SQLModel):
     
 class TreinoBase(SQLModel):
     id_exercicio: int = Field(default=None, foreign_key="exercicio.id")
-    grupo_muscular: str = Field(default=None)
 
 class Treino(TreinoBase,table=True):
     id: int = Field(default_factory=None, primary_key=True)
@@ -248,16 +252,16 @@ class TreinoCreate(TreinoBase):
 class TreinoPublic(Treino):
     id: int
     id_exercicio: int
-    grupo_muscular: str
-
 
 class TreinosPublic(SQLModel):
     data: list[TreinoPublic]
     count: int
     
+class treino_exercicio(SQLModel,table=True):
+    id_treino: int = Field(default=None, foreign_key="treino.id",primary_key=True)
+    id_exercicio: int = Field(default=None, foreign_key="exercicio.id",primary_key=True)
 
 class SessaoBase(SQLModel):
-    id_treino: int = Field(default=None, foreign_key="treino.id")
     data: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
     duracao_minutos: int = Field(default=None)
     
@@ -276,6 +280,12 @@ class SessaoPublic(Sessao):
 class SessoesPublic(SQLModel):
     data: list[SessaoPublic]
     count: int
+
+class treino_sessao(SQLModel,table=True):
+    id_treino1: int = Field(default=None, foreign_key="treino.id",primary_key=True)
+    id_treino2: int = Field(default=None, foreign_key="treino.id",primary_key=True)
+    id_treino3: int = Field(default=None, foreign_key="treino.id",primary_key=True)
+    id_trei: int = Field(default=None, foreign_key="sessao.id",primary_key=True)
 
 class DietaBase(SQLModel):
     id: int = Field(default_factory=None, primary_key=True)

@@ -1,8 +1,9 @@
 import uuid
-from typing import Any
+from typing import Any,List,Dict
+
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from sqlmodel import col, delete, func, select,text
 import re
 from app import crud
 from app.api.deps import (
@@ -49,9 +50,33 @@ def read_treinadores(session: SessionDep, skip: int = 0, limit: int = 100) -> An
     count_statement = select(func.count()).select_from(Treinador)
     count = session.exec(count_statement).one()
 
-    statement = select(Treinador).offset(skip).limit(limit)
-    treinadores = session.exec(statement).all()
+    sql_query = text("""
+    SELECT 
+        treinador.id AS id_treinador,
+        treinador.name AS name_treinador,
+        treinador.especialidade AS espec_treinador,
+        telefone_treinador.telefone as telefone_treinador
+    FROM 
+        treinador
+    INNER JOIN 
+        treinador_telefones ON treinador.id = treinador_telefones.treinador_id
+    INNER JOIN 
+        telefone as telefone_treinador ON treinador_telefones.telefone_id = telefone_treinador.telefone
+    LIMIT :limit OFFSET :skip
+    """)
+    
+    results = session.execute(sql_query, {"limit": limit, "skip": skip}).all()
 
+    treinadores = [
+        TreinadorPublic(
+            id=row[0],
+            name=row[1],
+            especialidade=row[2],
+            telefone=row[3]
+        )
+        for row in results
+    ]
+    
     return TreinadoresPublic(data=treinadores, count=count)
 
 

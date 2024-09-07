@@ -302,30 +302,27 @@ class DietasPublic(SQLModel):
 class PlanoBase(SQLModel):
     id: int | None = Field(default_factory=None, primary_key=True)
     id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id")
-    id_dieta: int | None = Field(default_factory=None)
-    id_sessao_treino: int | None = Field(default_factory=None)
-    id_treinador: int | None = Field(default_factory=None)
-    id_avaliacao : int | None = Field(default_factory = None)
-    local: str | None = Field(default_factory=None)
+    id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
+    id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
+    id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
 
 class PlanoCreate(PlanoBase):
-    id_dieta: int | None = Field(default_factory=None)
-    id_sessao_treino: int | None = Field(default_factory=None)
-    id_treinador: int | None = Field(default_factory=None)
-    id_avaliacao : int | None = Field(default_factory = None)
-    local: str | None = Field(default_factory=None)
+    id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id")
+    id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
+    id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
+    id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
 
 
 
 class PlanoUpdate(PlanoBase):
     id_dieta: int | None = Field(default_factory=None)
     id_sessao_treino: int | None = Field(default_factory=None)
-    id_treinador: int | None = Field(default_factory=None)
+    id_treinador: str | None = Field(default_factory=None)
     id_avaliacao : int | None = Field(default_factory = None)
-    local: str | None = Field(default_factory=None)
 
 class Plano(PlanoBase, table=True):
-    pass
+    id_dieta: int | None = Field(default_factory=None,foreign_key="dieta.id")
+
 class PlanoPublic(PlanoBase):
     pass
 

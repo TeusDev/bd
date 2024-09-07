@@ -1,8 +1,8 @@
 """fks
 
-Revision ID: 28fe8426e6e3
-Revises: b55def56e8c1
-Create Date: 2024-09-07 02:16:18.986381
+Revision ID: b68517527bfb
+Revises: befe50d55582
+Create Date: 2024-09-07 08:53:55.937124
 
 """
 from alembic import op
@@ -11,8 +11,8 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision = '28fe8426e6e3'
-down_revision = 'b55def56e8c1'
+revision = 'b68517527bfb'
+down_revision = 'befe50d55582'
 branch_labels = None
 depends_on = None
 

@@ -2,16 +2,18 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
-
+from sqlmodel import func, select,text
+from .calorias import calculate_calories 
 from app.api.deps import CurrentUser, SessionDep
+from app.crud import get_avaliacao
 from app.models import (
     Plano,
     PlanoBase,
     PlanoCreate,
     PlanosPublic,
     PlanoUpdate,
-    PlanoPublic
+    PlanoPublic,
+    Avaliacao
 )
 
 router = APIRouter()
@@ -33,106 +35,31 @@ def create_planos(
     """
     Create new plano.
     """
-    plano = Plano.model_validate(plano_in)
-    session.add(plano)
+    avaliacao = get_avaliacao(session=session,id=plano_in.id_avaliacao)
+    calorias = calculate_calories(avaliacao=avaliacao)
+    # plano = Plano.model_validate(plano_in)
+     # Call the stored procedure
+    procedure_call = text("""
+        SELECT id_dieta
+        FROM get_dieta_by_max_calories(:calories)
+    """)
+    result = session.execute(procedure_call, {'calories':calorias}).fetchone()
+
+    if result is None:
+        raise ValueError("No dieta found with the given calorie limit")
+
+    id_dieta = result.id_dieta
+    
+    plano = Plano(
+        id=plano_in.id,
+        id_user=plano_in.id_dieta,
+        id_sessao_treino=plano_in.id_sessao_treino,
+        id_treinador=plano_in.id_treinador,
+        id_avaliacao=plano_in.id_avaliacao,
+        id_dieta=id_dieta
+    )
+    planes = Plano.model_validate(plano)
+    session.add(planes)
     session.commit()
-    session.refresh(plano)
-    return plano
-
-# @router.get("/", response_model=ItemsPublic)
-# def read_items(
-#     session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
-# ) -> Any:
-#     """
-#     Retrieve items.
-#     """
-
-#     if current_user.is_superuser:
-#         count_statement = select(func.count()).select_from(Item)
-#         count = session.exec(count_statement).one()
-#         statement = select(Item).offset(skip).limit(limit)
-#         items = session.exec(statement).all()
-#     else:
-#         count_statement = (
-#             select(func.count())
-#             .select_from(Item)
-#             .where(Item.owner_id == current_user.id)
-#         )
-#         count = session.exec(count_statement).one()
-#         statement = (
-#             select(Item)
-#             .where(Item.owner_id == current_user.id)
-#             .offset(skip)
-#             .limit(limit)
-#         )
-#         items = session.exec(statement).all()
-
-#     return ItemsPublic(data=items, count=count)
-
-
-# @router.get("/{id}", response_model=ItemPublic)
-# def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
-#     """
-#     Get item by ID.
-#     """
-#     item = session.get(Item, id)
-#     if not item:
-#         raise HTTPException(status_code=404, detail="Item not found")
-#     if not current_user.is_superuser and (item.owner_id != current_user.id):
-#         raise HTTPException(status_code=400, detail="Not enough permissions")
-#     return item
-
-
-# @router.post("/", response_model=ItemPublic)
-# def create_item(
-#     *, session: SessionDep, current_user: CurrentUser, item_in: ItemCreate
-# ) -> Any:
-#     """
-#     Create new item.
-#     """
-#     item = Item.model_validate(item_in, update={"owner_id": current_user.id})
-#     session.add(item)
-#     session.commit()
-#     session.refresh(item)
-#     return item
-
-
-# @router.put("/{id}", response_model=ItemPublic)
-# def update_item(
-#     *,
-#     session: SessionDep,
-#     current_user: CurrentUser,
-#     id: uuid.UUID,
-#     item_in: ItemUpdate,
-# ) -> Any:
-#     """
-#     Update an item.
-#     """
-#     item = session.get(Item, id)
-#     if not item:
-#         raise HTTPException(status_code=404, detail="Item not found")
-#     if not current_user.is_superuser and (item.owner_id != current_user.id):
-#         raise HTTPException(status_code=400, detail="Not enough permissions")
-#     update_dict = item_in.model_dump(exclude_unset=True)
-#     item.sqlmodel_update(update_dict)
-#     session.add(item)
-#     session.commit()
-#     session.refresh(item)
-#     return item
-
-
-# @router.delete("/{id}")
-# def delete_item(
-#     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
-# ) -> Message:
-#     """
-#     Delete an item.
-#     """
-#     item = session.get(Item, id)
-#     if not item:
-#         raise HTTPException(status_code=404, detail="Item not found")
-#     if not current_user.is_superuser and (item.owner_id != current_user.id):
-#         raise HTTPException(status_code=400, detail="Not enough permissions")
-#     session.delete(item)
-#     session.commit()
-#     return Message(message="Item deleted successfully")
+    session.refresh(planes)
+    return planes

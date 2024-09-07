@@ -159,6 +159,10 @@ def get_avaliacoes(*, session: Session, id: int) -> Avaliacao | None:
     avaliacoes = session.exec(statement).first()
     return avaliacoes
 
+def get_avaliacao(*, session: Session, id: int):
+    avaliacao = session.get(Avaliacao, id)
+    return avaliacao
+
 def authenticate(*, session: Session, email: str, password: str) -> User | None:
     db_user = get_user_by_email(session=session, email=email)
     if not db_user:
@@ -215,7 +219,7 @@ def delete_refeicao(*, session: Session, refeicao_id: int):
     return {"ok": True}
 
 
-def create_dieta(*, session: Session, dieta_create: Dieta, refeicoes_ids: list[int]) -> Dieta:
+def create_dieta(*, session: Session, dieta_create: DietaCreate, refeicoes_ids: list[int]) -> Dieta:
     db_obj = Dieta.model_validate(
         dieta_create
     )

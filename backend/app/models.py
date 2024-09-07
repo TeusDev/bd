@@ -240,7 +240,8 @@ class ExerciciosPublic(SQLModel):
     count: int
     
 class TreinoBase(SQLModel):
-    id_exercicio: int = Field(default=None, foreign_key="exercicio.id")
+    calorias: int = Field(default=None)
+    
 
 class Treino(TreinoBase,table=True):
     id: int = Field(default_factory=None, primary_key=True)
@@ -270,14 +271,23 @@ class Sessao(SessaoBase,table=True):
 
 class SessaoCreate(SessaoBase):
     id: int = Field(default_factory=None, primary_key=True)
+    data: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
+    duracao_minutos: int = Field(default=None)
 
 
-class SessaoPublic(Sessao):
+class SessaoPublic(SQLModel):
     id: int
-    e
     data: datetime.datetime 
-    duracao_minutos: int
+    duracao_total: int
+    exercicio1: str
+    exercicio2: str
+    exercicio3: str
+    grupo_muscular1: str
+    grupo_muscular2: str
+    grupo_muscular3: str
     calorias_gastas: int
+    
+    
 class SessoesPublic(SQLModel):
     data: list[SessaoPublic]
     count: int

@@ -55,13 +55,7 @@ def create_treino(*, session: SessionDep, treino_in: TreinoCreate) -> Any:
     """
     Create new treino.
     """
-    exercicio = crud.get_exercicios(session=session, id=treino_in.id_exercicio)
-    if not exercicio:
-        raise HTTPException(
-            status_code=400,
-            detail="The exercicio with this id doesnt exists in the system.",
-        )
-        
+     
     treino = crud.get_treinos(session=session, id=treino_in.id)
     if treino:
         raise HTTPException(

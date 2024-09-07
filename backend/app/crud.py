@@ -32,7 +32,8 @@ from app.models import (
     Treino,
     TreinoCreate,
     dieta_refeicoes,
-    treinador_telefones
+    treinador_telefones,
+    treino_sessao
 )
 
 def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Telefone:
@@ -62,13 +63,26 @@ def create_treino(*, session: Session, treino_create: TreinoCreate) -> Treino:
     session.refresh(db_obj)
     return db_obj
 
-def create_sessao(*, session: Session, sessao_create: SessaoCreate) -> Sessao:
+def create_sessao(*, session: Session, sessao_create: SessaoCreate,treino_ids:list[int]) -> Sessao:
     db_obj = Sessao.model_validate(
         sessao_create
     )
+    
+    treino_ref = treino_sessao(
+        id_treino1=treino_ids[0],
+        id_treino2=treino_ids[1],
+        id_treino3=treino_ids[2],
+        id_sessao=sessao_create.id
+    )
+    
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
+    
+    session.add(treino_ref)
+    session.commit()
+    session.refresh(treino_ref)
+    
     return db_obj
 
 
@@ -250,7 +264,8 @@ def create_dieta(*, session: Session, dieta_create: DietaCreate, refeicoes_ids: 
     )
     session.add(dieta_ref)
     session.commit()
-
+    session.refresh(dieta_ref)
+    
     return db_obj
     
 def index_dietas(*, session: Session, skip: int = 0, limit: int = 10):

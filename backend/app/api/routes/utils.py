@@ -1,3 +1,6 @@
+from sqlalchemy.orm import Session
+from sqlmodel import select
+
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
@@ -24,3 +27,4 @@ def test_email(email_to: EmailStr) -> Message:
         html_content=email_data.html_content,
     )
     return Message(message="Test email sent")
+

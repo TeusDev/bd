@@ -7,65 +7,35 @@
 # from app import crud
 # from app.core.config import settings
 # from app.core.security import verify_password
-# from app.models import User, UserCreate
+# from app.models import User, UserCreate,Telefone,TelefoneCreate
 # from app.tests.utils.utils import random_email, random_lower_string
 
-
-# def test_get_users_superuser_me(
-#     client: TestClient, superuser_token_headers: dict[str, str]
-# ) -> None:
-#     r = client.get(f"{settings.API_V1_STR}/users/me", headers=superuser_token_headers)
-#     current_user = r.json()
-#     assert current_user
-#     assert current_user["is_active"] is True
-#     assert current_user["is_superuser"]
-#     assert current_user["email"] == settings.FIRST_SUPERUSER
-
-
-# def test_get_users_normal_user_me(
-#     client: TestClient, normal_user_token_headers: dict[str, str]
-# ) -> None:
-#     r = client.get(f"{settings.API_V1_STR}/users/me", headers=normal_user_token_headers)
-#     current_user = r.json()
-#     assert current_user
-#     assert current_user["is_active"] is True
-#     assert current_user["is_superuser"] is False
-#     assert current_user["email"] == settings.EMAIL_TEST_USER
-
-
-# def test_create_user_new_email(
+# def test_read_item(
 #     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 # ) -> None:
-#     with (
-#         patch("app.utils.send_email", return_value=None),
-#         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
-#         patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
-#     ):
-#         username = random_email()
-#         password = random_lower_string()
-#         data = {"email": username, "password": password}
-#         r = client.post(
-#             f"{settings.API_V1_STR}/users/",
-#             headers=superuser_token_headers,
-#             json=data,
-#         )
-#         assert 200 <= r.status_code < 300
-#         created_user = r.json()
-#         user = crud.get_user_by_email(session=db, email=username)
-#         assert user
-#         assert user.email == created_user["email"]
-
-
-# def test_get_existing_user(
-#     client: TestClient, superuser_token_headers: dict[str, str], db: Session
+#     item = create_random_item(db)
+#     response = client.get(
+#         f"{settings.API_V1_STR}/items/{item.id}",
+#         headers=superuser_token_headers,
+#     )
+#     assert response.status_code == 200
+#     content = response.json()
+#     assert content["title"] == item.title
+#     assert content["description"] == item.description
+#     assert content["id"] == str(item.id)
+#     assert content["owner_id"] == str(item.owner_id)
+    
+# def test_get_existing_telefone(
+#     client: TestClient, 
+#     # superuser_token_headers: dict[str, str], 
+#     db: Session
 # ) -> None:
-#     username = random_email()
-#     password = random_lower_string()
-#     user_in = UserCreate(email=username, password=password)
-#     user = crud.create_user(session=db, user_create=user_in)
+#     telefone = random_lower_string()
+#     telefone_in = TelefoneCreate(telefone=telefone)
+#     user = crud.create_telefone(session=db, telefone_create=telefone_in)
 #     user_id = user.id
 #     r = client.get(
-#         f"{settings.API_V1_STR}/users/{user_id}",
+#         f"{settings.API_V1_STR}/telefones/{user_id}",
 #         headers=superuser_token_headers,
 #     )
 #     assert 200 <= r.status_code < 300

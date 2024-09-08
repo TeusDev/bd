@@ -82,8 +82,9 @@ def get_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
 )
 def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: RefeicaoUpdate) -> Any:
     """
-    Update a refeicao by ID.
+    Update a refeicao by ID, including updating the name and calorias.
     """
+    # Fetch the existing refeicao record
     refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
     if not refeicao:
         raise HTTPException(
@@ -91,12 +92,27 @@ def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: Refei
             detail="Refeicao not found.",
         )
 
-    refeicao = crud.update_refeicao(
-        session=session, 
-        refeicao_id=refeicao_id, 
-        refeicao=refeicao_in
+    # Update the refeicao record
+    sql_query = text("""
+    UPDATE refeicao
+    SET name = :name,
+        calorias = :calorias
+    WHERE id = :refeicao_id;
+    """)
+    session.execute(
+        sql_query,
+        {
+            "name": refeicao_in.name,
+            "calorias": refeicao_in.calorias,  # Assuming you have a calorias field in RefeicaoUpdate
+            "refeicao_id": refeicao_id
+        }
     )
-    return refeicao
+
+    session.commit()  # Commit the changes
+
+    # Return the updated refeicao
+    updated_refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
+    return updated_refeicao
 
 @router.delete(
         "/{refeicao_id}",

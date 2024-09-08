@@ -307,7 +307,7 @@ class Dieta(DietaBase,table=True):
 
 class DietaCreate(DietaBase):
     id: int
-class DietaUpdate(DietaBase):
+class DietaUpdate(SQLModel):
     id_ref_manha: Optional[int]
     id_ref_tarde: Optional[int]
     id_ref_noite: Optional[int]

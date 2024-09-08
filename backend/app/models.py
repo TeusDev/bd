@@ -384,15 +384,17 @@ class AvaliacoesPublic(SQLModel):
     count: int
     
 class ShapeBase(SQLModel):
-    nome_foto: str = Field(primary_key=True)
+    nome_foto: str = Field(default=None)
 class Shape(ShapeBase, table=True):
+    id: int | None = Field(default=None,primary_key=True) 
     foto: bytes | None = Field(default=None, sa_column=Column(LargeBinary))
-class ShapeCreate(ShapeBase):
+class ShapeCreate(Shape):
     pass
 class ShapeDelete(Shape):
     pass
 
 class ShapePublic(Shape):
+    id: int
     nome_foto: str
     foto: str | None = None  # Use str to store base64 encoded string
 

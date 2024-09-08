@@ -238,6 +238,8 @@ def get_refeicao(*, session: Session, refeicao_id: int):
     # statement = select(Refeicao).where(Refeicao.id == id)
     return refeicao
 
+
+
 def update_refeicao(*, session: Session, refeicao_id: int, refeicao: Refeicao):
     db_refeicao = session.get(Refeicao, refeicao_id)
     

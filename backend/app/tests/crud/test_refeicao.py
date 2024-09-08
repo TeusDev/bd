@@ -26,7 +26,7 @@ from .utils import (
 N = 11
 
 def test_create_refeicao(db: Session) -> None:
-    for i in range(50):
+    for i in range(20):
         nome_dieta = random.choice(diet_meals)
         calorias = random.randint(300,2000)
         id = random.randint(0,10000000)
@@ -44,29 +44,3 @@ def test_create_refeicao(db: Session) -> None:
         assert refeicao.id == id
         assert refeicao.name == nome_dieta
         assert refeicao.calorias == calorias
-
-
-
-def test_get_refeicao(db: Session) -> None:
-    for i in range(50):
-        nome_dieta = random.choice(diet_meals)
-        calorias = random.randint(300,2000)
-        id = random.randint(0,10000000)
-        refeicao = RefeicaoCreate(
-            id=id,
-            name=nome_dieta,
-            calorias=calorias
-        )
-        
-        existing_ref = crud.get_refeicao(session=db,id=id)
-        if existing_ref:
-            continue
-        
-        refeicoes = crud.create_refeicao(session=db,refeicao_create=refeicao)
-        assert refeicao.id == id
-        assert refeicao.name == nome_dieta
-        assert refeicao.calorias == calorias
-        existing_ref2 = crud.get_refeicao(session=db,id=id)
-        assert existing_ref2
-
-

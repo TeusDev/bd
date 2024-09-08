@@ -16,6 +16,7 @@ from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.models import (
     Dieta,
+    Message,
     DietaCreate,
     DietaPublic,
     DietasPublic,
@@ -282,18 +283,34 @@ def update_dieta(*, session: SessionDep, dieta_id: int, dieta_in: DietaUpdate) -
 
 @router.delete(
         "/{dieta_id}",
-        response_model=DietaPublic
+        response_model=Message
 )
 def delete_dieta(*, session: SessionDep, dieta_id: int) -> Any:
     """
     Delete a dieta by ID.
     """
-    dieta = crud.get_dieta(session=session, dieta_id=dieta_id)
+    # Fetch the existing dieta record
+    dieta = crud.get_dieta(session=session, id=dieta_id)
     if not dieta:
         raise HTTPException(
             status_code=404,
             detail="Dieta not found.",
-    )
+        )
 
-    crud.delete_dieta(session=session, dieta_id=dieta_id)
-    return dieta
+    # Delete dieta_refeicoes associated with this dieta
+    sql_query = text("""
+    DELETE FROM dieta_refeicoes
+    WHERE id_dieta = :dieta_id;
+    """)
+    session.execute(sql_query, {"dieta_id": dieta_id})
+
+    # Delete the dieta itself
+    sql_query = text("""
+    DELETE FROM dieta
+    WHERE id = :dieta_id;
+    """)
+    session.execute(sql_query, {"dieta_id": dieta_id})
+    
+    session.commit()  # Commit the changes
+
+    return Message(message="Deleted dieta")

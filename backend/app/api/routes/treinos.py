@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from sqlmodel import col, delete, func, select,text
 import re
 from app import crud
 from app.api.deps import (
@@ -22,6 +22,7 @@ from app.models import (
     Treino,
     TreinoCreate,
     TreinoPublic,
+    treino_exercicio,
     TreinosPublic,
     Message
 )
@@ -42,8 +43,30 @@ def read_treinos(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     count_statement = select(func.count()).select_from(Treino)
     count = session.exec(count_statement).one()
 
-    statement = select(Treino).offset(skip).limit(limit)
-    treinos = session.exec(statement).all()
+    sql_query = text("""
+    SELECT 
+        t.id AS id_treino,
+        te.id_exercicio AS id_exercicio,
+        t.calorias
+    FROM 
+        treino AS t
+    LEFT JOIN 
+        treino_exercicio AS te ON t.id = te.id_treino
+    LEFT JOIN 
+        exercicio AS e ON te.id_exercicio = e.id
+    LIMIT :limit OFFSET :skip
+    """)
+
+    results = session.execute(sql_query, {"limit": limit, "skip": skip}).all()
+
+    treinos = [
+        TreinoPublic(
+            id=row[0],
+            id_exercicio=row[1],
+            calorias=row[2]
+        )
+        for row in results
+    ]
 
     return TreinosPublic(data=treinos, count=count)
 

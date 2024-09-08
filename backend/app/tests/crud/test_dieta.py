@@ -1,5 +1,5 @@
 from fastapi.encoders import jsonable_encoder
-from sqlmodel import Session
+from sqlmodel import Session,select
 import uuid
 from app import crud
 from app.core.security import verify_password
@@ -61,9 +61,9 @@ def test_create_dieta(db: Session) -> None:
             calorias=calorias3
         )
         
-        existing_ref1 = crud.get_refeicao(session=db,id=id1)
-        existing_ref2 = crud.get_refeicao(session=db,id=id2)
-        existing_ref3 = crud.get_refeicao(session=db,id=id3)
+        existing_ref1 = crud.get_refeicao(session=db,refeicao_id=id1)
+        existing_ref2 = crud.get_refeicao(session=db,refeicao_id=id2)
+        existing_ref3 = crud.get_refeicao(session=db,refeicao_id=id3)
 
         if existing_ref1 or existing_ref2 or existing_ref3:
             continue
@@ -77,7 +77,7 @@ def test_create_dieta(db: Session) -> None:
         id = random.randint(0,10000000)
         
           
-        existing_ref = crud.get_refeicao(session=db,id=id)
+        existing_ref = crud.get_refeicao(session=db,refeicao_id=id)
         if existing_ref:
             continue
         
@@ -91,11 +91,9 @@ def test_create_dieta(db: Session) -> None:
         if existing_dieta:
             continue
         
-        dietas = crud.create_dieta(session=db,dieta_create=dieta)
+        dietas = crud.create_dieta(session=db,dieta_create=dieta,refeicoes_ids=[refeicao1.id,refeicao2.id,refeicao3.id])
         assert dietas.id == id
-        assert dietas.id_ref_manha == id1
-        assert dietas.id_ref_tarde == id2
-        assert dietas.id_ref_noite == id3
+
         
         dieta_refeicoez = dieta_refeicoes(
             id_dieta=dieta.id,
@@ -104,6 +102,10 @@ def test_create_dieta(db: Session) -> None:
             id_ref_noite=refeicao3.id
         )
         
+        statement = select(dieta_refeicoes).where(dieta_refeicoes.id_dieta == dieta.id)
+        warnings = db.exec(statement).first()
+        if warnings:
+            continue
         db.add(dieta_refeicoez)
         db.commit()
         db.refresh(dieta_refeicoez)

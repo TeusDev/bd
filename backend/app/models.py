@@ -72,7 +72,6 @@ class UserBase(SQLModel):
 class UserCreate(UserBase):
     cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     password: str = Field(min_length=8, max_length=40)
-    email: EmailStr = Field(unique=True, index=True, max_length=255)
 
 class UserRegister(SQLModel):
     cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
@@ -360,6 +359,7 @@ class AvaliacaoBase(SQLModel):
     peso: float = Field(default = 0.0)
     altura: float = Field(default = 0.0)
     perc_gordura: float = Field(default = 0.0)
+    shape_id: int | None = Field(default=None,foreign_key="shape.id") 
     
 class AvaliacaoCreate(AvaliacaoBase):
     id: int | None = Field(default=None,primary_key=True) 
@@ -372,8 +372,7 @@ class AvaliacaoUpdate(AvaliacaoBase):
     perc_gordura: float = Field(default = 0.0)
 
 
-class Avaliacao(AvaliacaoBase, table=True):
-    id: int | None = Field(default=None,primary_key=True) 
+
 
 class AvaliacaoPublic(AvaliacaoBase):
     id: int
@@ -407,3 +406,6 @@ class ShapePublic(Shape):
 class ShapesPublic(SQLModel):
     data: list[ShapePublic]
     count: int
+    
+class Avaliacao(AvaliacaoBase, table=True):
+    id: int | None = Field(default=None,primary_key=True)

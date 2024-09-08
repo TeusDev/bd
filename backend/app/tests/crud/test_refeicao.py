@@ -36,7 +36,7 @@ def test_create_refeicao(db: Session) -> None:
             calorias=calorias
         )
         
-        existing_ref = crud.get_refeicao(session=db,id=id)
+        existing_ref = crud.get_refeicao(session=db,refeicao_id=id)
         if existing_ref:
             continue
         

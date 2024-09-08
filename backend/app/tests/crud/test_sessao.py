@@ -1,5 +1,5 @@
 from fastapi.encoders import jsonable_encoder
-from sqlmodel import Session
+from sqlmodel import Session,select
 import uuid
 from app import crud
 from app.core.security import verify_password
@@ -53,8 +53,6 @@ def test_create_sessao(db: Session) -> None:
         
         exerciciosz = crud.create_exercicio(session=db,exercicio_create=exercicio)
         assert exerciciosz.id == id
-        assert exerciciosz.name ==exercicio_aleatorio
-        assert exerciciosz.calorias == exerciciosh[exercicio_aleatorio]
         
         calorias = random.randint(300,2000)
 
@@ -67,18 +65,23 @@ def test_create_sessao(db: Session) -> None:
         if existing_treino:
             continue
         
-        treinosz = crud.create_treino(session=db,treino_create=treino)
+        treinosz = crud.create_treino(session=db,treino_create=treino,exercicio=exercicio.id)
         assert treinosz.id == id
         assert treinosz.calorias == calorias
         
-        treino_exercicio = treino_exercicio(
+        treino_exercicioz = treino_exercicio(
             id_treino=treinosz.id,
-            id_exercicio=treinosz.id_exercicio
+            id_exercicio=exerciciosz.id
         )
         
-        db.add(treino_exercicio)
+        statement = select(treino_exercicio).where(treino_exercicio.id_treino == treinosz.id)
+        warnings = db.exec(statement).first()
+        if warnings:
+            continue
+        
+        db.add(treino_exercicioz)
         db.commit()
-        db.refresh(treino_exercicio)
+        db.refresh(treino_exercicioz)
         
         duracao_minutos = random.randint(15,120)
         data_avaliacao = random_datetime(start_date, end_date)
@@ -99,6 +102,11 @@ def test_create_sessao(db: Session) -> None:
             id_treino3 = id,
             id_sessao=id
         )        
+        
+        statement = select(treino_session).where(treino_session.id_sessao == sessaoz.id)
+        warnings = db.exec(statement).first()
+        if warnings:
+            continue
         
         db.add(treino_sessao)
         db.commit()

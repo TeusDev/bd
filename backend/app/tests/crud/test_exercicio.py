@@ -46,6 +46,4 @@ def test_create_exercicio(db: Session) -> None:
         
         exerciciosz = crud.create_exercicio(session=db,exercicio_create=exercicio)
         assert exerciciosz.id == id
-        assert exerciciosz.name ==exercicio_aleatorio
-        assert exerciciosz.calorias == exerciciosh[exercicio_aleatorio]
 

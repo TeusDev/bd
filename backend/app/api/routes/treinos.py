@@ -51,21 +51,30 @@ def read_treinos(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 @router.post(
     "/",response_model=TreinoPublic
 )
-def create_treino(*, session: SessionDep, treino_in: TreinoCreate) -> Any:
+def create_treino(*, session: SessionDep, treino_in: TreinoCreate,exercicio_id:int) -> Any:
     """
     Create new treino.
     """
      
-    treino = crud.get_treinos(session=session, id=treino_in.id)
-    if treino:
+    treino1 = crud.get_treinos(session=session, id=treino_in.id)
+    if treino1:
         raise HTTPException(
             status_code=400,
             detail="The treino with this id already exists in the system.",
         )
-        
-        
-    treino = crud.create_treino(session=session, treino_create=treino_in)
-    return treino
+    ex = crud.get_exercicios(session=session,id=exercicio_id)
+    if not ex:
+         raise HTTPException(
+            status_code=400,
+            detail="The exercicio with this id doesnt exists in the system.",
+        )
+    treino = crud.create_treino(session=session, treino_create=treino_in,exercicio=exercicio_id)
+    treinoz = TreinoPublic(
+        id=treino_in.id,
+        id_exercicio=exercicio_id,
+        calorias=treino_in.calorias
+    )
+    return treinoz
 
 @router.delete("/{treino}")
 def delete_treino(

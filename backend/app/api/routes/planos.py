@@ -38,6 +38,25 @@ def create_planos(
     avaliacao = get_avaliacao(session=session,id=plano_in.id_avaliacao)
     calorias = calculate_calories(avaliacao=avaliacao)
 
+    create_procedure_sql = """
+        CREATE OR REPLACE FUNCTION get_dieta_by_max_calories(calories NUMERIC)
+        RETURNS TABLE(id_dieta INT) AS $$
+        BEGIN
+            RETURN QUERY
+            SELECT dr.id_dieta
+            FROM dieta_refeicoes dr
+            JOIN refeicao r_manha ON dr.id_ref_manha = r_manha.id
+            JOIN refeicao r_tarde ON dr.id_ref_tarde = r_tarde.id
+            JOIN refeicao r_noite ON dr.id_ref_noite = r_noite.id
+            GROUP BY dr.id_dieta
+            HAVING SUM(r_manha.calories + r_tarde.calories + r_noite.calories) <= calories
+            ORDER BY SUM(r_manha.calories + r_tarde.calories + r_noite.calories) DESC
+            LIMIT 1;
+        END;
+        $$ LANGUAGE plpgsql;
+        """
+    session.execute(create_procedure_sql)
+    session.commit()
     procedure_call = text("""
         SELECT id_dieta
         FROM get_dieta_by_max_calories(:calories)

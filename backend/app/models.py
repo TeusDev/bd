@@ -250,9 +250,10 @@ class TreinoCreate(TreinoBase):
     id: int = Field(default_factory=None, primary_key=True)
 
 
-class TreinoPublic(Treino):
+class TreinoPublic(SQLModel):
     id: int
     id_exercicio: int
+    calorias: int
 
 class TreinosPublic(SQLModel):
     data: list[TreinoPublic]

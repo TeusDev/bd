@@ -27,7 +27,7 @@ from app.models import (
     TreinoCreate,
     TreinoPublic,
     TreinosPublic,
-    
+    treino_sessao,
     Message
 )
 from app.utils import generate_new_account_email, send_email
@@ -149,7 +149,28 @@ def create_sessao(*, session: SessionDep,
         
     
     sessao = crud.create_sessao(session=session, sessao_create=sessao_in,treino_ids=[treino1,treino2,treino3])
-  
+    
+    
+    sessao_ref = treino_sessao(
+        id_sessao=sessao_in.id,
+        id_treino1=treino1,
+        id_treino2=treino2,
+        id_treino3=treino3
+    )
+    
+      
+    stm2 = select(treino_sessao).where(treino_sessao.id_sessao==sessao.id
+                                       and treino_sessao.id_treino1==treino1
+                                       and treino_sessao.id_treino2==treino2
+                                       and treino_sessao.id_treino3==treino3)
+    existing_ref = session.exec(stm2).first()
+    if existing_ref:
+        return Message("Associação entre sessao e treinos ja existe")
+    
+    session.add(sessao_ref)
+    session.commit()
+    session.refresh(sessao_ref)
+
 
     create_procedure_sql = text("""
         CREATE OR REPLACE FUNCTION get_total_calories(p_id_sessao INTEGER)  -- Renamed parameter

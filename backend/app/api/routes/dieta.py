@@ -118,6 +118,26 @@ def create_dieta(*, session: SessionDep, dieta_in: DietaCreate,
 
     
     dieta = crud.create_dieta(refeicoes_ids=[id_ref_manha,id_ref_tarde,id_ref_noite],session=session,dieta_create=dieta_in)
+    
+    dieta_ref = dieta_refeicoes(
+        id_dieta=dieta_in.id,
+        id_ref_manha=id_ref_manha,
+        id_ref_tarde=id_ref_tarde,
+        id_ref_noite=id_ref_noite
+    )
+    
+    statement = select(dieta_refeicoes).where(dieta_refeicoes.id_dieta ==dieta_in.id
+                                              and id_ref_manha==id_ref_manha
+                                              and id_ref_tarde==id_ref_tarde
+                                              and id_ref_noite == id_ref_noite)
+    warnings = session.exec(statement).first()
+    if warnings:
+        return Message(Message="relacao entre dieta e refeições ja existe")
+    
+    session.add(dieta_ref)
+    session.commit()
+    session.refresh(dieta_ref)
+    
     sql_query = text("""
     SELECT 
         dieta.id AS id_dieta,

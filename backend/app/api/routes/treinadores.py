@@ -31,6 +31,7 @@ from app.models import (
     TreinadorCreate,
     TreinadorPublic,
     TreinadoresPublic,
+    treinador_telefones,
     TreinadorUpdate
 )
 from app.utils import generate_new_account_email, send_email
@@ -145,6 +146,22 @@ def create_treinadores(*, session: SessionDep, treinador_in: TreinadorCreate,tel
                                       treinador_create=treinador_in,
                                       telefone=telefone
                                       )
+    
+     
+    telefone_ref = treinador_telefones(
+        treinador_id=treinador.id,
+        telefone_id=telefone
+    )
+    
+    statement = select(treinador_telefones).where(treinador_telefones.treinador_id == treinador.id)
+    warnings = session.exec(statement).first()
+    if warnings:
+        return Message(Message="relacao entre treinador e telefone ja existe")
+    
+    session.add(telefone_ref)
+    session.commit()
+    session.refresh(telefone_ref)
+    
     
     sql_query = text("""
     SELECT 

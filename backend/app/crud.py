@@ -63,13 +63,13 @@ def create_treino(*, session: Session, treino_create: TreinoCreate,exercicio:int
     session.commit()
     session.refresh(db_obj)
     
-    treino_exercicios = treino_exercicio(
-        id_treino=treino_create.id,
-        id_exercicio=exercicio
-    )
-    session.add(treino_exercicios)
-    session.commit()
-    session.refresh(treino_exercicios)
+    # treino_exercicios = treino_exercicio(
+    #     id_treino=treino_create.id,
+    #     id_exercicio=exercicio
+    # )
+    # session.add(treino_exercicios)
+    # session.commit()
+    # session.refresh(treino_exercicios)
     
     return db_obj
 
@@ -82,15 +82,15 @@ def create_sessao(*, session: Session, sessao_create: SessaoCreate,treino_ids:li
     session.commit()
     session.refresh(db_obj)
     
-    sessao_ref = treino_sessao(
-        id_sessao=db_obj.id,
-        id_treino1=treino_ids[0],
-        id_treino2=treino_ids[1],
-        id_treino3=treino_ids[2]
-    )
-    session.add(sessao_ref)
-    session.commit()
-    session.refresh(sessao_ref)
+    # sessao_ref = treino_sessao(
+    #     id_sessao=db_obj.id,
+    #     id_treino1=treino_ids[0],
+    #     id_treino2=treino_ids[1],
+    #     id_treino3=treino_ids[2]
+    # )
+    # session.add(sessao_ref)
+    # session.commit()
+    # session.refresh(sessao_ref)
 
     return db_obj
 
@@ -113,7 +113,7 @@ def create_plano(*,session:Session,plano_create:PlanoCreate) -> Plano:
     session.refresh(db_obj)
     return db_obj
 
-def create_treinador(*, session: Session, treinador_create: TreinadorCreate,telefone:str) -> Treinador:
+def create_treinador(*, session: Session, treinador_create: TreinadorCreate,telefone:str) -> Treinador | None:
     db_obj = Treinador.model_validate(
         treinador_create
     )
@@ -123,14 +123,19 @@ def create_treinador(*, session: Session, treinador_create: TreinadorCreate,tele
     
     
     
-    telefone_ref = treinador_telefones(
-        treinador_id=treinador_create.id,
-        telefone_id=telefone
-    )
+    # telefone_ref = treinador_telefones(
+    #     treinador_id=treinador_create.id,
+    #     telefone_id=telefone
+    # )
     
-    session.add(telefone_ref)
-    session.commit()
-    session.refresh(telefone_ref)
+    # statement = select(treinador_telefones).where(treinador_telefones.treinador_id == treinador_id)
+    # warnings = session.exec(statement).first()
+    # if warnings:
+    #     return None
+    
+    # session.add(telefone_ref)
+    # session.commit()
+    # session.refresh(telefone_ref)
     
     return db_obj
 
@@ -265,15 +270,15 @@ def create_dieta(*, session: Session, dieta_create: DietaCreate, refeicoes_ids: 
     session.commit()
     session.refresh(db_obj)
 
-    dieta_ref = dieta_refeicoes(
-        id_dieta=db_obj.id,
-        id_ref_manha=refeicoes_ids[0],
-        id_ref_tarde=refeicoes_ids[1],
-        id_ref_noite=refeicoes_ids[2]
-    )
-    session.add(dieta_ref)
-    session.commit()
-    session.refresh(dieta_ref)
+    # dieta_ref = dieta_refeicoes(
+    #     id_dieta=db_obj.id,
+    #     id_ref_manha=refeicoes_ids[0],
+    #     id_ref_tarde=refeicoes_ids[1],
+    #     id_ref_noite=refeicoes_ids[2]
+    # )
+    # session.add(dieta_ref)
+    # session.commit()
+    # session.refresh(dieta_ref)
     
     return db_obj
     

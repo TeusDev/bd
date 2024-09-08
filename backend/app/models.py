@@ -226,9 +226,10 @@ class ExercicioBase(SQLModel):
 class Exercicio(ExercicioBase, table=True):
     id: int = Field(default_factory=None, primary_key=True)
 
-class ExercicioCreate(ExercicioBase):
+class ExercicioCreate(SQLModel):
     id: int = Field(default_factory=None, primary_key=True)
-
+    exercicio: str = Field(default_factory=None)
+    grupo_muscular: str | None = Field(default=None)
 class ExercicioPublic(Exercicio):
     id: int
     exercicio: str

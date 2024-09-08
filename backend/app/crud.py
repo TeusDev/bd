@@ -81,6 +81,16 @@ def create_sessao(*, session: Session, sessao_create: SessaoCreate,treino_ids:li
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
+    
+    sessao_ref = treino_sessao(
+        id_sessao=db_obj.id,
+        id_treino1=treino_ids[0],
+        id_treino2=treino_ids[1],
+        id_treino3=treino_ids[2]
+    )
+    session.add(sessao_ref)
+    session.commit()
+    session.refresh(sessao_ref)
 
     return db_obj
 
@@ -255,8 +265,6 @@ def create_dieta(*, session: Session, dieta_create: DietaCreate, refeicoes_ids: 
     session.commit()
     session.refresh(db_obj)
 
-
-    # Create and add entries to the dieta_refeicoes table
     dieta_ref = dieta_refeicoes(
         id_dieta=db_obj.id,
         id_ref_manha=refeicoes_ids[0],
@@ -287,9 +295,7 @@ def update_dieta(*, session: Session, dieta_id: str, dieta: Dieta):
     return db_dieta
 
 def nullify_dieta_references(*, session: Session, refeicao_id: int) -> None:
-    """
-    Set dieta references to NULL where refeicao is being deleted.
-    """
+
     # Atualiza as dietas que têm a refeição como referência para NULL
     session.exec(
         update_dieta(Dieta)

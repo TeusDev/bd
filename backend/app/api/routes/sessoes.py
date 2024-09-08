@@ -48,40 +48,41 @@ def read_sessoes(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     count = session.exec(count_statement).one()
 
     sql_query = text("""
-   SELECT 
-    sessao.id AS sessao_id,
-    sessao.data AS sessao_data,
-    sessao.duracao_minutos AS duracao_total,
-    e1.exercicio AS exercicio1,
-    e2.exercicio AS exercicio2,
-    e3.exercicio AS exercicio3,
-    e1.grupo_muscular AS grupo_muscular1,
-    e2.grupo_muscular AS grupo_muscular2,
-    e3.grupo_muscular AS grupo_muscular3,
-    COALESCE(t1.calorias, 0) + COALESCE(t2.calorias, 0) + COALESCE(t3.calorias, 0) AS calorias_gastas_total
-FROM 
-    sessao
-LEFT JOIN 
-    treino_sessao AS ts ON ts.id_sessao = sessao.id
-LEFT JOIN 
-    treino_exercicio AS te1 ON te1.id_treino = ts.id_treino1
-LEFT JOIN 
-    treino_exercicio AS te2 ON te2.id_treino = ts.id_treino2
-LEFT JOIN 
-    treino_exercicio AS te3 ON te3.id_treino = ts.id_treino3
-LEFT JOIN 
-    exercicio AS e1 ON e1.id = te1.id_exercicio
-LEFT JOIN 
-    exercicio AS e2 ON e2.id = te2.id_exercicio
-LEFT JOIN 
-    exercicio AS e3 ON e3.id = te3.id_exercicio
-LEFT JOIN 
-    treino AS t1 ON t1.id = ts.id_treino1
-LEFT JOIN 
-    treino AS t2 ON t2.id = ts.id_treino2
-LEFT JOIN 
-    treino AS t3 ON t3.id = ts.id_treino3
-LIMIT :limit OFFSET :skip""")
+       SELECT 
+        sessao.id AS sessao_id,
+        sessao.data AS sessao_data,
+        sessao.duracao_minutos AS duracao_total,
+        e1.exercicio AS exercicio1,
+        e2.exercicio AS exercicio2,
+        e3.exercicio AS exercicio3,
+        e1.grupo_muscular AS grupo_muscular1,
+        e2.grupo_muscular AS grupo_muscular2,
+        e3.grupo_muscular AS grupo_muscular3,
+        COALESCE(t1.calorias, 0) + COALESCE(t2.calorias, 0) + COALESCE(t3.calorias, 0) AS calorias_gastas_total
+    FROM 
+        sessao
+    INNER JOIN 
+        treino_sessao AS ts ON ts.id_sessao = sessao.id
+    INNER JOIN 
+        treino AS t1 ON t1.id = ts.id_treino1
+    INNER JOIN 
+        treino AS t2 ON t2.id = ts.id_treino2
+    INNER JOIN 
+        treino AS t3 ON t3.id = ts.id_treino3
+    INNER JOIN 
+        treino_exercicio AS te1 ON te1.id_treino = t1.id
+    INNER JOIN 
+        treino_exercicio AS te2 ON te2.id_treino = t2.id
+    INNER JOIN 
+        treino_exercicio AS te3 ON te3.id_treino = t3.id
+    INNER JOIN 
+        exercicio AS e1 ON e1.id = te1.id_exercicio
+    INNER JOIN 
+        exercicio AS e2 ON e2.id = te2.id_exercicio
+    INNER JOIN 
+        exercicio AS e3 ON e3.id = te3.id_exercicio
+    LIMIT :limit OFFSET :skip
+    """)
 
     results = session.execute(sql_query, {"limit": limit, "skip": skip}).all()
 

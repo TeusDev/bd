@@ -233,7 +233,18 @@ class ExercicioCreate(SQLModel):
 class ExercicioPublic(Exercicio):
     id: int
     exercicio: str
+    grupo_muscular: str 
     
+class ExercicioQueryPublic(SQLModel):
+    id: int
+    exercicio: str
+    grupo_muscular: str 
+
+
+class ExerciciosQueryPublic(SQLModel):
+    data: list[ExercicioQueryPublic]
+    count: int
+
 
 class ExerciciosPublic(SQLModel):
     data: list[ExercicioPublic]
@@ -325,13 +336,13 @@ class DietasPublic(SQLModel):
 
 class PlanoBase(SQLModel):
     id: int | None = Field(default_factory=None, primary_key=True)
-    id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id")
+    id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id",primary_key=True)
     id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
     id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
     id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
 
 class PlanoCreate(PlanoBase):
-    id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id")
+    id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id",primary_key=True)
     id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
     id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
     id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
@@ -345,8 +356,7 @@ class PlanoUpdate(PlanoBase):
     id_avaliacao : int | None = Field(default_factory = None)
 
 class Plano(PlanoBase, table=True):
-    id_dieta: int | None = Field(default_factory=None,foreign_key="dieta.id")
-
+    pass
 class PlanoPublic(PlanoBase):
     pass
 

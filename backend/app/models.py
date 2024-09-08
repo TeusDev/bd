@@ -393,7 +393,7 @@ class ShapeCreate(Shape):
 class ShapeDelete(Shape):
     pass
 
-class ShapePublic(Shape):
+class ShapePublic(SQLModel):
     id: int
     nome_foto: str
     foto: str | None = None  # Use str to store base64 encoded string
@@ -402,7 +402,7 @@ class ShapePublic(Shape):
     def from_orm(cls, shape):
         # Base64 encode the binary data
         foto_encoded = base64.b64encode(shape.foto).decode('utf-8') if shape.foto else None
-        return cls(nome_foto=shape.nome_foto, foto=foto_encoded)
+        return cls(id=shape.id,nome_foto=shape.nome_foto, foto=foto_encoded)
 
 class ShapesPublic(SQLModel):
     data: list[ShapePublic]

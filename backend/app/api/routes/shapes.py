@@ -35,11 +35,12 @@ router = APIRouter()
 @router.post("/shapes/", response_model=ShapePublic)
 async def create_upload_file(
     session: SessionDep,
+    id: int,
     nome_foto: str,
     file: UploadFile = File(...)
 ):
     contents = await file.read()
-    new_shape = Shape(nome_foto=nome_foto, foto=contents)
+    new_shape = Shape(id=id,nome_foto=nome_foto, foto=contents)
     session.add(new_shape)
     session.commit()
     session.refresh(new_shape)
@@ -47,8 +48,8 @@ async def create_upload_file(
     return ShapePublic.from_orm(new_shape)
 
 @router.get("/shapes/{shape_id}/foto")
-async def get_foto(session: SessionDep, nome_foto: str):
-    result = session.execute(select(Shape).where(Shape.nome_foto == nome_foto))
+async def get_foto(session: SessionDep, id: int):
+    result = session.execute(select(Shape).where(Shape.id == id))
     shape = result.scalars().first()
 
     if not shape or not shape.foto:

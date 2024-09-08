@@ -32,7 +32,7 @@ from .utils import (
 )
     
 # cpf and telefone
-N = 11
+N=8
 
 def test_create_treino(db: Session) -> None:
     for i in range(25):

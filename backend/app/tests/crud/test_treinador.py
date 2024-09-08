@@ -11,7 +11,7 @@ from .nome_gen import choose_name
 import random
 from .utils import especialidades
 # cpf and telefone
-N = 11
+N=8
 
 
 

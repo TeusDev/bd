@@ -1,8 +1,8 @@
-"""sessao
+"""oas
 
-Revision ID: 27aa2657a3d5
-Revises: 8e2a823c854b
-Create Date: 2024-09-07 19:07:11.004184
+Revision ID: 81ac8f791f7f
+Revises: d6486b600d6a
+Create Date: 2024-09-08 05:24:50.132826
 
 """
 from alembic import op
@@ -11,8 +11,8 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision = '27aa2657a3d5'
-down_revision = '8e2a823c854b'
+revision = '81ac8f791f7f'
+down_revision = 'd6486b600d6a'
 branch_labels = None
 depends_on = None
 

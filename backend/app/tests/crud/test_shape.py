@@ -12,7 +12,7 @@
 # import random
 # from .utils import especialidades, random_datetime,start_date,end_date
 # # cpf and telefone
-# N = 11
+# N=8
 
 # def test_create_shape(db: Session) -> None:
 #     for i in range(20):

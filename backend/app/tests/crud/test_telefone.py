@@ -9,7 +9,7 @@ import secrets
 import string
 
 # cpf and telefone
-N = 11
+N = 8
 
 
 def test_create_telefone(db: Session) -> None:

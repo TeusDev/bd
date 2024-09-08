@@ -28,7 +28,7 @@ from .utils import (
 )
     
 # cpf and telefone
-N = 11
+N=8
 
 def test_create_dieta(db: Session) -> None:
     for i in range(20):

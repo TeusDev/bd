@@ -35,7 +35,7 @@ from .utils import (
 )
     
 # cpf and telefone
-N = 11
+N=8
 
 def test_create_sessao(db: Session) -> None:
     for i in range(25):
@@ -94,7 +94,7 @@ def test_create_sessao(db: Session) -> None:
             data=data_avaliacao,
             duracao_minutos=duracao_minutos
         )
-        session = crud.create_sessao(session=db,sessao_create=sessaoz)
+        session = crud.create_sessao(session=db,sessao_create=sessaoz,treino_ids=[treino.id,treino.id,treino.id])
 
         treino_session = treino_sessao (
             id_treino1 = id,

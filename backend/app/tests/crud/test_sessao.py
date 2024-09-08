@@ -95,7 +95,7 @@ def test_create_sessao(db: Session) -> None:
             duracao_minutos=duracao_minutos
         )
         session = crud.create_sessao(session=db,sessao_create=sessaoz,treino_ids=[treino.id,treino.id,treino.id])
-
+        
         treino_session = treino_sessao (
             id_treino1 = id,
             id_treino2 = id,

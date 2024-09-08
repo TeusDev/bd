@@ -78,21 +78,10 @@ def create_sessao(*, session: Session, sessao_create: SessaoCreate,treino_ids:li
         sessao_create
     )
     
-    treino_ref = treino_sessao(
-        id_treino1=treino_ids[0],
-        id_treino2=treino_ids[1],
-        id_treino3=treino_ids[2],
-        id_sessao=sessao_create.id
-    )
-    
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
-    
-    session.add(treino_ref)
-    session.commit()
-    session.refresh(treino_ref)
-    
+
     return db_obj
 
 

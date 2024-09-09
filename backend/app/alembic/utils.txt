@@ -14,3 +14,4 @@
     op.execute("DROP VIEW exercicios_com_pernas")
     op.execute("DROP VIEW exercicios_cardio")
     op.execute("DROP TABLE exercicio;")
+    op.execute('DROP TABLE "user";')

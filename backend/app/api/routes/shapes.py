@@ -3,6 +3,11 @@ from typing import Any
 from sqlmodel import Session, select
 import io
 
+<<<<<<< HEAD
+from datetime import datetime
+
+=======
+>>>>>>> merge-jp-lucas-teusdev-thfer
 from fastapi import (
     APIRouter, 
     HTTPException,
@@ -32,6 +37,23 @@ from app.models import (
 )
 
 router = APIRouter()
+<<<<<<< HEAD
+
+@router.post("/shapes/", response_model=ShapePublic)
+async def create_upload_file(
+    session: SessionDep,
+    
+    current_user: CurrentUser,
+    file: UploadFile = File(...)
+):
+    nome_foto = datetime.now().strftime("capture_%Y%m%d_%H%M%S")
+
+    contents = await file.read()
+    new_shape = Shape(nome_foto=nome_foto, foto=contents, usuario_id=current_user.id)
+    session.add(new_shape)
+    session.commit()
+    session.refresh(new_shape)
+=======
 @router.post("/shapes/", response_model=ShapePublic)
 async def create_upload_file(
     session: SessionDep,
@@ -45,6 +67,7 @@ async def create_upload_file(
     session.commit()
     session.refresh(new_shape)
 
+>>>>>>> merge-jp-lucas-teusdev-thfer
     return ShapePublic.from_orm(new_shape)
 
 @router.get("/shapes/{shape_id}/foto")
@@ -57,6 +80,73 @@ async def get_foto(session: SessionDep, id: int):
 
     return StreamingResponse(io.BytesIO(shape.foto), media_type="image/png")
 
+<<<<<<< HEAD
+@router.get("/shapes/fotos")
+async def get_fotos(
+    session: SessionDep, 
+    current_user: CurrentUser
+):
+    if current_user.is_superuser:
+        result = session.execute(select(Shape))
+    else:
+        result = session.execute(select(Shape).where(Shape.usuario_id == current_user.id))
+    
+    shapes = result.scalars().all()
+
+    if not shapes:
+        raise HTTPException(status_code=404, detail="No shapes or photos found")
+
+    fotos = [{"id": shape.id, "foto": io.BytesIO(shape.foto)} for shape in shapes if shape.foto]
+    if not fotos:
+        raise HTTPException(status_code=404, detail="No photos available")
+
+    responses = [{"id": foto["id"]} for foto in fotos]
+
+    return responses
+
+@router.get("/shapes/fotos/{user_id}")
+async def get_fotos_by_user(
+    user_id: int,
+    session: SessionDep, 
+    current_user: CurrentUser
+):
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Operation not permitted")
+
+    result = session.execute(select(Shape).where(Shape.usuario_id == user_id))
+    
+    shapes = result.scalars().all()
+
+    if not shapes:
+        raise HTTPException(status_code=404, detail="No shapes or photos found for the specified user")
+
+    fotos = [{"id": shape.id, "foto": io.BytesIO(shape.foto)} for shape in shapes if shape.foto]
+    if not fotos:
+        raise HTTPException(status_code=404, detail="No photos available for the specified user")
+
+    responses = [{"id": foto["id"], "foto": StreamingResponse(foto["foto"], media_type="image/png")} for foto in fotos]
+
+    return responses
+
+@router.delete("/shapes/fotos/{shape_id}")
+async def delete_foto(
+    shape_id: int,
+    session: SessionDep, 
+    current_user: CurrentUser
+):
+    shape = session.get(Shape, shape_id)
+    
+    if not shape:
+        raise HTTPException(status_code=404, detail="Shape not found")
+    
+    if not current_user.is_superuser and shape.usuario_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Operation not permitted")
+
+    session.delete(shape)
+    session.commit()
+    
+    return {"detail": "Shape deleted successfully"}
+=======
 @router.delete("/shapes/{shape_id}/delete_photo", response_model=ShapePublic)
 async def delete_photo(session: SessionDep, shape_id: int):
     shape = session.query(Shape).filter(Shape.id == shape_id).first()
@@ -68,3 +158,4 @@ async def delete_photo(session: SessionDep, shape_id: int):
     session.commit()
 
     return ShapePublic.from_orm(shape)
+>>>>>>> merge-jp-lucas-teusdev-thfer

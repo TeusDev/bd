@@ -31,7 +31,11 @@ from .utils import (
 N=8
 
 def test_create_dieta(db: Session) -> None:
+<<<<<<< HEAD
+    for i in range(20):
+=======
     for i in range(40):
+>>>>>>> merge-jp-lucas-teusdev-thfer
         nome_dieta1 = random.choice(diet_meals)
         nome_dieta2 = random.choice(diet_meals)
         nome_dieta3 = random.choice(diet_meals)

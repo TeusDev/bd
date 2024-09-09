@@ -2,7 +2,11 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+<<<<<<< HEAD
+from sqlmodel import col, delete, func, select
+=======
 from sqlmodel import col, delete, func, select,text
+>>>>>>> merge-jp-lucas-teusdev-thfer
 
 from app import crud
 from app.api.deps import (
@@ -17,8 +21,12 @@ from app.models import (
     RefeicaoCreate,
     RefeicaoPublic,
     RefeicoesPublic,
+<<<<<<< HEAD
+    RefeicaoUpdate
+=======
     RefeicaoUpdate,
     Message
+>>>>>>> merge-jp-lucas-teusdev-thfer
 )
 from app.utils import generate_new_account_email, send_email
 
@@ -82,9 +90,14 @@ def get_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
 )
 def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: RefeicaoUpdate) -> Any:
     """
+<<<<<<< HEAD
+    Update a refeicao by ID.
+    """
+=======
     Update a refeicao by ID, including updating the name and calorias.
     """
     # Fetch the existing refeicao record
+>>>>>>> merge-jp-lucas-teusdev-thfer
     refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
     if not refeicao:
         raise HTTPException(
@@ -92,6 +105,23 @@ def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: Refei
             detail="Refeicao not found.",
         )
 
+<<<<<<< HEAD
+    refeicao = crud.update_refeicao(
+        session=session, 
+        refeicao_id=refeicao_id, 
+        refeicao=refeicao_in
+    )
+    return refeicao
+
+@router.delete(
+        "/{refeicao_id}",
+        response_model=RefeicaoPublic
+)
+def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
+    """
+    Delete a refeicao by ID.
+    """
+=======
     # Update the refeicao record
     sql_query = text("""
     UPDATE refeicao
@@ -123,6 +153,7 @@ def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
     Delete a refeicao by ID, including related dieta and dieta_refeicoes.
     """
     # Fetch the existing refeicao record
+>>>>>>> merge-jp-lucas-teusdev-thfer
     refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
     if not refeicao:
         raise HTTPException(
@@ -130,6 +161,10 @@ def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
             detail="Refeicao not found.",
         )
 
+<<<<<<< HEAD
+    crud.delete_refeicao(session=session, refeicao_id=refeicao_id)
+    return refeicao
+=======
     # Check if the refeicao is associated with any dietas
     sql_query = text("""
     SELECT id_dieta 
@@ -177,3 +212,4 @@ def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
     session.commit()  # Commit the changes
 
     return Message(message="Deleted refeicao and associated dietas")
+>>>>>>> merge-jp-lucas-teusdev-thfer

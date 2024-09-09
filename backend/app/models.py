@@ -73,7 +73,6 @@ class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
-    birthdate: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
     name: str | None = Field(default=None, max_length=255)
 
 
@@ -86,7 +85,6 @@ class UserRegister(SQLModel):
     cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
-    birthdate: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
     name: str | None = Field(default=None, max_length=255)
 
 
@@ -108,69 +106,19 @@ class UpdatePassword(SQLModel):
 
 # Database model, database table inferred from class name
 class User(UserBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
+    id: Optional[int] = Field(default=None, primary_key=True)
     hashed_password: str
 
     # items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
-    id: uuid.UUID
     email: str
-    birthdate: datetime.datetime
-    name: str
-
-
-    
-# class ItemsPublic(SQLModel):
-#     data: list[ItemPublic]
-#     count: int
+    id: int
 
 class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
-
-
-# # Shared properties
-# class ItemBase(SQLModel):
-#     title: str = Field(min_length=1, max_length=255)
-#     description: str | None = Field(default=None, max_length=255)
-
-
-# # Properties to receive on item creation
-# class ItemCreate(ItemBase):
-#     pass
-
-
-# # Properties to receive on item update
-# class ItemUpdate(ItemBase):
-#     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
-
-
-# Database model, database table inferred from class name
-# class Item(ItemBase, table=True):
-    # id: uuid.UUID = Field(default_factory=None, primary_key=True)
-    # title: str = Field(max_length=255)
-# # Database model, database table inferred from class name
-# class Item(ItemBase, table=True):
-#     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-#     title: str = Field(max_length=255)
-#     owner_id: uuid.UUID = Field(
-#         foreign_key="user.id", nullable=False, ondelete="CASCADE"
-#     )
-#     owner: User | None = Relationship(back_populates="items")
-
-# # Properties to return via API, id is always required
-# class ItemPublic(ItemBase):
-#     id: uuid.UUID
-#     owner_id: uuid.UUID
-
-
-# class ItemsPublic(SQLModel):
-#     data: list[ItemPublic]
-#     count: int
-
 
 # Generic message
 class Message(SQLModel):
@@ -202,9 +150,6 @@ class RefeicaoBase(SQLModel):
 class Refeicao(RefeicaoBase, table=True):
     id: int = Field(default=None, primary_key=True)
 
-    
-# Update forward references for the SQLModel
-Refeicao.update_forward_refs()
     
 class RefeicaoCreate(RefeicaoBase):
     id: int = Field(default=None, primary_key=True)
@@ -339,13 +284,13 @@ class DietasPublic(SQLModel):
 
 class PlanoBase(SQLModel):
     id: int | None = Field(default_factory=None, primary_key=True)
-    id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id",primary_key=True)
+    id_user: int = Field(default_factory=None, foreign_key="user.id")
     id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
     id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
     id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
 
 class PlanoCreate(PlanoBase):
-    id_user: uuid.UUID = Field(default_factory=uuid.uuid4, foreign_key="user.id",primary_key=True)
+    id_user: int = Field(default_factory=None, foreign_key="user.id")
     id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
     id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
     id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
@@ -359,7 +304,8 @@ class PlanoUpdate(PlanoBase):
     id_avaliacao : int | None = Field(default_factory = None)
 
 class Plano(PlanoBase, table=True):
-    pass
+    id_dieta: int | None = Field(default_factory=None,foreign_key="dieta.id")
+
 class PlanoPublic(PlanoBase):
     pass
 
@@ -373,7 +319,7 @@ class AvaliacaoBase(SQLModel):
     peso: float = Field(default = 0.0)
     altura: float = Field(default = 0.0)
     perc_gordura: float = Field(default = 0.0)
-    shape_id: int | None = Field(default=None,foreign_key="shape.id") 
+    shape_id: int | None = Field(default=None,foreign_key="shape.id", ondelete="CASCADE") 
     
 class AvaliacaoCreate(AvaliacaoBase):
     id: int | None = Field(default=None,primary_key=True) 
@@ -398,6 +344,7 @@ class AvaliacoesPublic(SQLModel):
     
 class ShapeBase(SQLModel):
     nome_foto: str = Field(default=None)
+    usuario_id: int | None = Field(default=None, foreign_key="user.id")
 class Shape(ShapeBase, table=True):
     id: int | None = Field(default=None,primary_key=True) 
     foto: bytes | None = Field(default=None, sa_column=Column(LargeBinary))
@@ -410,12 +357,12 @@ class ShapePublic(SQLModel):
     id: int
     nome_foto: str
     foto: str | None = None  # Use str to store base64 encoded string
-
+    usuario_id: int
     @classmethod
     def from_orm(cls, shape):
         # Base64 encode the binary data
         foto_encoded = base64.b64encode(shape.foto).decode('utf-8') if shape.foto else None
-        return cls(id=shape.id,nome_foto=shape.nome_foto, foto=foto_encoded)
+        return cls(id=shape.id,nome_foto=shape.nome_foto,usuario_id=shape.usuario_id, foto=foto_encoded)
 
 class ShapesPublic(SQLModel):
     data: list[ShapePublic]

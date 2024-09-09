@@ -56,3 +56,15 @@ async def get_foto(session: SessionDep, id: int):
         raise HTTPException(status_code=404, detail="Shape or photo not found")
 
     return StreamingResponse(io.BytesIO(shape.foto), media_type="image/png")
+
+@router.delete("/shapes/{shape_id}/delete_photo", response_model=ShapePublic)
+async def delete_photo(session: SessionDep, shape_id: int):
+    shape = session.query(Shape).filter(Shape.id == shape_id).first()
+
+    if not shape or not shape.foto:
+        raise HTTPException(status_code=404, detail="Shape or photo not found")
+
+    session.delete(shape)
+    session.commit()
+
+    return ShapePublic.from_orm(shape)

@@ -19,15 +19,15 @@ class dieta_refeicoes(SQLModel,table=True):
     id_ref_noite: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id")
 
 class TreinadorBase(SQLModel):
-    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
+    telefone: str | None = Field(max_length=11,default=None,unique=True)
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
 
 # Properties to receive via API on update, all are optional
 class TreinadorUpdate(TreinadorBase):
-    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
+    telefone: str | None = Field(max_length=8,default=None,unique=True)
     especialidade: str | None = Field(default=None, min_length=8, max_length=40)
-
+    
     
 class Treinador(TreinadorBase, table=True):
     id: str = Field(default=None, primary_key=True,max_length=11)
@@ -35,8 +35,10 @@ class Treinador(TreinadorBase, table=True):
 class TreinadorPublic(SQLModel):
     id: Optional[str]
     name: Optional[str] 
+    telefone: Optional[str]
     especialidade: Optional[str]
     telefone: Optional[str]
+    local_de_treino: Optional[str]
 class TreinadoresPublic(SQLModel):
     data: list[TreinadorPublic]
     count: int
@@ -45,6 +47,30 @@ class TreinadorCreate(SQLModel):
     id: str = Field(default=None, primary_key=True,max_length=11)
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
+    telefone: str | None = Field(max_length=8,default=None,unique=True)
+class LocalBase(SQLModel):
+    nome_local: str = Field(default=None, max_length=255)
+    
+class Local(LocalBase,table=True):
+    id: int = Field(default=None, primary_key=True)
+
+class treinador_locais(SQLModel,table=True):
+    treinador_id: str = Field(default=None, primary_key=True,max_length=11,foreign_key="treinador.id")
+    local_id: int = Field(default=None, primary_key=True,foreign_key="local.id")
+    
+
+class LocalPublic(Local):
+    telefone: str
+
+class LocaisPublic(SQLModel):
+    data: list[LocalPublic]
+    count: int
+    
+class LocalCreate(LocalBase):
+    id: int = Field(default=None, primary_key=True)
+    
+
+
 class TelefoneBase(SQLModel):
     telefone: str = Field(default=None, primary_key=True,max_length=11)
 

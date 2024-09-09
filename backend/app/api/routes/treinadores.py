@@ -24,6 +24,7 @@ from app.models import (
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
+    Local,
     Telefone,
     TelefoneCreate,
     TelefonePublic,
@@ -31,8 +32,8 @@ from app.models import (
     TreinadorCreate,
     TreinadorPublic,
     TreinadoresPublic,
-    treinador_telefones,
-    TreinadorUpdate
+    TreinadorUpdate,
+    treinador_locais
 )
 from app.utils import generate_new_account_email, send_email
 from .telefones import create_telefone
@@ -56,13 +57,14 @@ def read_treinadores(session: SessionDep, skip: int = 0, limit: int = 100) -> An
         treinador.id AS id_treinador,
         treinador.name AS name_treinador,
         treinador.especialidade AS espec_treinador,
-        telefone_treinador.telefone as telefone_treinador
+        treinador.telefone as telefone_treinador,
+        local_de_treino.nome_local 
     FROM 
         treinador
     INNER JOIN 
-        treinador_telefones ON treinador.id = treinador_telefones.treinador_id
+        treinador_locais ON treinador.id = treinador_locais.treinador_id
     INNER JOIN 
-        telefone as telefone_treinador ON treinador_telefones.telefone_id = telefone_treinador.telefone
+        local as local_de_treino ON treinador_locais.local_id = local.id
     LIMIT :limit OFFSET :skip
     """)
     
@@ -73,7 +75,8 @@ def read_treinadores(session: SessionDep, skip: int = 0, limit: int = 100) -> An
             id=row[0],
             name=row[1],
             especialidade=row[2],
-            telefone=row[3]
+            telefone=row[3],
+            local_de_treino=row[4]
         )
         for row in results
     ]
@@ -85,12 +88,12 @@ def read_treinadores(session: SessionDep, skip: int = 0, limit: int = 100) -> An
     "/telefone",
     response_model=TreinadorPublic
 )
-def read_treinadores_tel(session: SessionDep, telefone:str) -> Any:
+def read_treinadores_tel(session: SessionDep, id:str) -> Any:
     """
-    Retrieve treinadores by telefone.
+    Retrieve treinadores by id.
     """
 
-    statement = select(Treinador).where(Treinador.telefone == telefone)
+    statement = select(Treinador).where(Treinador.id == id)
     treinador = session.exec(statement).all()
 
     return treinador
@@ -117,67 +120,77 @@ def read_treinadores_especialidade(session: SessionDep, especialidade:str,skip: 
 @router.post(
     "/",response_model=TreinadorPublic
 )
-def create_treinadores(*, session: SessionDep, treinador_in: TreinadorCreate,telefone:str) -> Any:
+def create_treinadores(*, session: SessionDep, treinador_in: TreinadorCreate,local_id:int) -> Any:
     """
     Create new treinador.
     """
     pattern = r"\d{8}"
-    is_valid = bool(re.match(pattern,telefone))
+    is_valid = bool(re.match(pattern,treinador_in.telefone))
     if (not is_valid):
         raise HTTPException(
             status_code=400,
             detail="The telefone with this format is not valid.",
         )
-        
-    telefone_in = crud.get_telefones(session=session,telefone=telefone)
-    if not telefone_in:
+    statement = select(Treinador).where(Treinador.telefone == treinador_in.telefone)
+    telefones = session.exec(statement).first()
+    # telefone_in = crud.get_telefones(session=session,telefone=telefone)
+    if telefones:
         raise HTTPException(
             status_code=400,
-            detail="The telefone with this line doesnt exists in the system.",
+            detail="The telefone with this line already exists in the system.",
         )
-    treinador = crud.get_treinadores(session=session, telefone=telefone)
+    
+    statement = select(Local).where(Local.id ==local_id)
+    locais = session.exec(statement).first()
+    # telefone_in = crud.get_telefones(session=session,telefone=telefone)
+    if not locais:
+        raise HTTPException(
+            status_code=400,
+            detail="The local with this id doesnt already exists in the system.",
+        ) 
+    
+    
+    treinador = crud.get_treinadores(session=session, id=treinador_in.id)
     if treinador:
         raise HTTPException(
             status_code=400,
-            detail="The treinador with this line already exists in the system.",
+            detail="The treinador with this id already exists in the system.",
         )
 
     treinador = crud.create_treinador(session=session, 
-                                      treinador_create=treinador_in,
-                                      telefone=telefone
+                                      treinador_create=treinador_in
                                       )
     
-     
-    telefone_ref = treinador_telefones(
+    local_ref = treinador_locais(
         treinador_id=treinador.id,
-        telefone_id=telefone
+        local_id=local_id
     )
-    
-    statement = select(treinador_telefones).where(treinador_telefones.treinador_id == treinador.id)
+   
+    # statement = select(treinador_telefones).where(treinador_telefones.treinador_id == treinador.id)
+    statement=select(treinador_locais).where(treinador_locais.treinador_id==treinador.id
+                                             and treinador_locais.local_id==local_id)
     warnings = session.exec(statement).first()
     if warnings:
-        return Message(Message="relacao entre treinador e telefone ja existe")
+        return Message(Message="relacao entre treinador e local ja existe")
     
-    session.add(telefone_ref)
+    session.add(local_ref)
     session.commit()
-    session.refresh(telefone_ref)
+    session.refresh(local_ref)
     
     
     sql_query = text("""
     SELECT 
-        treinador.id,
-        treinador.name ,
-        treinador.especialidade,
-        telefonez.telefone as telefones 
-            
+        treinador.id AS id_treinador,
+        treinador.name AS name_treinador,
+        treinador.especialidade AS espec_treinador,
+        treinador.telefone as telefone_treinador,
+        local_de_treino.nome_local 
     FROM 
         treinador
     INNER JOIN 
-        treinador_telefones ON treinador.id = treinador_telefones.treinador_id
+        treinador_locais ON treinador.id = treinador_locais.treinador_id
     INNER JOIN 
-        telefone AS telefonez ON treinador_telefones.telefone_id = telefonez.telefone
-    WHERE 
-        treinador.id = :treinador_id
+        local as local_de_treino ON treinador_locais.local_id = local.id
     LIMIT :limit OFFSET :skip
     """)
     result = session.execute(
@@ -189,7 +202,8 @@ def create_treinadores(*, session: SessionDep, treinador_in: TreinadorCreate,tel
             id=row[0],
             name=row[1],
             especialidade=row[2],
-            telefone=row[3]
+            telefone=row[3],
+            local_de_treino=row[4]
         )
         for row in result
     ]
@@ -197,21 +211,21 @@ def create_treinadores(*, session: SessionDep, treinador_in: TreinadorCreate,tel
     return treinadorz
 
 
-@router.delete("/{telefone}")
+@router.delete("/{id}")
 def delete_treinadores(
     session: SessionDep, 
-    telefone: str
+    id: str
 ) -> Message:
     """
     Delete a treinador.
     """
-    treinador = session.get(Treinador, telefone)
+    treinador = session.get(Treinador, id)
     if not treinador:
         raise HTTPException(status_code=404, detail="Treinador not found")
    
     session.delete(treinador)
     session.commit()
-    return Message(message="Item deleted successfully")
+    return Message(message="Treinador deleted successfully")
 
 
 
@@ -222,13 +236,12 @@ def delete_treinadores(
 def update_treinadores(
     *,
     session: SessionDep,
-    treinador_in: TreinadorUpdate,
-    telefone: str
+    treinador_in: TreinadorUpdate
 ) -> Any:
     """
     Update a treinador.
     """
-    treinador = session.get(Treinador, telefone)
+    treinador = session.get(Treinador, treinador_in.id)
     if not treinador:
         raise HTTPException(status_code=404, detail="treinador not found")
    

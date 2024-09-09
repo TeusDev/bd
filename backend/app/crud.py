@@ -190,8 +190,8 @@ def get_telefones(*, session: Session, telefone: str) -> Telefone | None:
     telefones = session.exec(statement).first()
     return telefones
 
-def get_treinadores(*, session: Session, telefone: str) -> Treinador | None:
-    statement = select(Treinador).where(Treinador.telefone == telefone)
+def get_treinadores(*, session: Session, id: str) -> Treinador | None:
+    statement = select(Treinador).where(Treinador.id == id)
     treinadores = session.exec(statement).first()
     return treinadores
 

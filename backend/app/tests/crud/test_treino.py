@@ -38,11 +38,16 @@ def test_create_treino(db: Session) -> None:
     for i in range(25):
         exercicio_aleatorio = random.choice(list(exerciciosh.keys()))
         id = random.randint(0,10000000)
+<<<<<<< HEAD
         exercicio = ExercicioCreate(
+=======
+        exercicioa = Exercicio(
+>>>>>>> merge-jp-lucas-teusdev-thfer
             id=id,
             exercicio=exercicio_aleatorio,
             grupo_muscular=exerciciosh[exercicio_aleatorio]
         )
+<<<<<<< HEAD
         
         existing_ex = crud.get_exercicios(session=db,id=id)
         if existing_ex:
@@ -54,10 +59,26 @@ def test_create_treino(db: Session) -> None:
         calorias = random.randint(300,2000)
 
         treino = TreinoCreate(
+=======
+        stm01 = select(Exercicio).where(Exercicio.id==id)
+        existing_ex = db.exec(stm01).first()
+        if existing_ex:
+            continue
+        
+        db.add(exercicioa)
+        db.commit()
+        db.refresh(exercicioa)
+        
+        
+        calorias = random.randint(300,2000)
+
+        treino = Treino(
+>>>>>>> merge-jp-lucas-teusdev-thfer
             id=id,
             calorias=calorias
         )
         
+<<<<<<< HEAD
         existing_treino = crud.get_treinos(session=db,id=id)
         if existing_treino:
             continue
@@ -79,6 +100,31 @@ def test_create_treino(db: Session) -> None:
         db.add(treino_exercicioz)
         db.commit()
         db.refresh(treino_exercicioz)
+=======
+        stm02 = select(Treino).where(Treino.id==id)
+        existing_treino = db.exec(stm02).first()
+        if existing_treino:
+            continue
+            
+        db.add(treino)
+        db.commit()
+        db.refresh(treino)
+         
+           
+        treino_exercicios = treino_exercicio(
+            id_treino=treino.id,
+            id_exercicio=exercicioa.id
+        )
+        
+        stm1 = select(treino_exercicio).where(treino_exercicio.id_treino==treino.id)
+        tr = db.exec(stm1).first()
+        if tr:
+            continue
+        
+        db.add(treino_exercicios)
+        db.commit()
+        db.refresh(treino_exercicios)
+>>>>>>> merge-jp-lucas-teusdev-thfer
         
         
         

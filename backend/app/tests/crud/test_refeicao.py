@@ -26,7 +26,11 @@ from .utils import (
 N=8
 
 def test_create_refeicao(db: Session) -> None:
+<<<<<<< HEAD
     for i in range(20):
+=======
+    for i in range(40):
+>>>>>>> merge-jp-lucas-teusdev-thfer
         nome_dieta = random.choice(diet_meals)
         calorias = random.randint(300,2000)
         id = random.randint(0,10000000)

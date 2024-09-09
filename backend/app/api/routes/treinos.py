@@ -92,6 +92,26 @@ def create_treino(*, session: SessionDep, treino_in: TreinoCreate,exercicio_id:i
             detail="The exercicio with this id doesnt exists in the system.",
         )
     treino = crud.create_treino(session=session, treino_create=treino_in,exercicio=exercicio_id)
+<<<<<<< HEAD
+=======
+    
+    treino_exercicios = treino_exercicio(
+        id_treino=treino_in.id,
+        id_exercicio=exercicio_id
+    )
+    
+    statement = select(treino_exercicio).where(treino_exercicio.id_treino == treino_in.id
+                                               and treino_exercicio.id_exercicio==exercicio_id)
+    warnings = session.exec(statement).first()
+    if warnings:
+        return Message(Message="relacao entre treino e exercicio ja existe")
+    
+    session.add(treino_exercicios)
+    session.commit()
+    session.refresh(treino_exercicios)
+    
+    
+>>>>>>> merge-jp-lucas-teusdev-thfer
     treinoz = TreinoPublic(
         id=treino_in.id,
         id_exercicio=exercicio_id,

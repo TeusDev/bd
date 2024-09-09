@@ -15,8 +15,6 @@ from app.models import (
     RefeicaoCreate,
     Dieta,
     DietaCreate, 
-    Telefone, 
-    TelefoneCreate,
     TreinadorCreate,
     Treinador,
     Avaliacao,
@@ -32,19 +30,10 @@ from app.models import (
     Treino,
     TreinoCreate,
     dieta_refeicoes,
-    treinador_telefones,
     treino_sessao,
     treino_exercicio
 )
 
-def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Telefone:
-    db_obj = Telefone.model_validate(
-        telefone_create
-    )
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
 
 def create_exercicio(*, session: Session, exercicio_create: ExercicioCreate) -> Exercicio:
     db_obj = Exercicio.model_validate(
@@ -63,14 +52,6 @@ def create_treino(*, session: Session, treino_create: TreinoCreate,exercicio:int
     session.commit()
     session.refresh(db_obj)
     
-    treino_exercicios = treino_exercicio(
-        id_treino=treino_create.id,
-        id_exercicio=exercicio
-    )
-    session.add(treino_exercicios)
-    session.commit()
-    session.refresh(treino_exercicios)
-    
     return db_obj
 
 def create_sessao(*, session: Session, sessao_create: SessaoCreate,treino_ids:list[int]) -> Sessao:
@@ -78,21 +59,10 @@ def create_sessao(*, session: Session, sessao_create: SessaoCreate,treino_ids:li
         sessao_create
     )
     
-    treino_ref = treino_sessao(
-        id_treino1=treino_ids[0],
-        id_treino2=treino_ids[1],
-        id_treino3=treino_ids[2],
-        id_sessao=sessao_create.id
-    )
-    
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
-    
-    session.add(treino_ref)
-    session.commit()
-    session.refresh(treino_ref)
-    
+ 
     return db_obj
 
 
@@ -114,7 +84,7 @@ def create_plano(*,session:Session,plano_create:PlanoCreate) -> Plano:
     session.refresh(db_obj)
     return db_obj
 
-def create_treinador(*, session: Session, treinador_create: TreinadorCreate,telefone:str) -> Treinador:
+def create_treinador(*, session: Session, treinador_create: TreinadorCreate) -> Treinador | None:
     db_obj = Treinador.model_validate(
         treinador_create
     )
@@ -122,16 +92,6 @@ def create_treinador(*, session: Session, treinador_create: TreinadorCreate,tele
     session.commit()
     session.refresh(db_obj)
     
-    
-    
-    telefone_ref = treinador_telefones(
-        treinador_id=treinador_create.id,
-        telefone_id=telefone
-    )
-    
-    session.add(telefone_ref)
-    session.commit()
-    session.refresh(telefone_ref)
     
     return db_obj
 
@@ -181,13 +141,9 @@ def get_sessoes(*, session: Session, id: int) -> Sessao | None:
     sessoes = session.exec(statement).first()
     return sessoes
 
-def get_telefones(*, session: Session, telefone: str) -> Telefone | None:
-    statement = select(Telefone).where(Telefone.telefone == telefone)
-    telefones = session.exec(statement).first()
-    return telefones
 
-def get_treinadores(*, session: Session, telefone: str) -> Treinador | None:
-    statement = select(Treinador).where(Treinador.telefone == telefone)
+def get_treinadores(*, session: Session, id: str) -> Treinador | None:
+    statement = select(Treinador).where(Treinador.id == id)
     treinadores = session.exec(statement).first()
     return treinadores
 
@@ -208,13 +164,6 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
         return None
     return db_user
 
-
-# def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
-#     db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
-#     session.add(db_item)
-#     session.commit()
-#     session.refresh(db_item)
-#     return db_item
 
 ##########LUCAS###########################
 # TODO: passar paramentros: refeicao_id
@@ -266,18 +215,6 @@ def create_dieta(*, session: Session, dieta_create: DietaCreate, refeicoes_ids: 
     session.commit()
     session.refresh(db_obj)
 
-
-    # Create and add entries to the dieta_refeicoes table
-    dieta_ref = dieta_refeicoes(
-        id_dieta=db_obj.id,
-        id_ref_manha=refeicoes_ids[0],
-        id_ref_tarde=refeicoes_ids[1],
-        id_ref_noite=refeicoes_ids[2]
-    )
-    session.add(dieta_ref)
-    session.commit()
-    session.refresh(dieta_ref)
-    
     return db_obj
     
 def index_dietas(*, session: Session, skip: int = 0, limit: int = 10):
@@ -298,9 +235,6 @@ def update_dieta(*, session: Session, dieta_id: str, dieta: Dieta):
     return db_dieta
 
 def nullify_dieta_references(*, session: Session, refeicao_id: int) -> None:
-    """
-    Set dieta references to NULL where refeicao is being deleted.
-    """
     # Atualiza as dietas que têm a refeição como referência para NULL
     session.exec(
         update_dieta(Dieta)
@@ -324,9 +258,3 @@ def delete_dieta(*, session: Session, dieta_id: str):
     session.delete(dieta)
     session.commit()
     return {"ok": True}
-# def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
-#     db_item = Item.model_validate(item_in, update={"owner_id": owner_id})
-#     session.add(db_item)
-#     session.commit()
-#     session.refresh(db_item)
-#     return db_item

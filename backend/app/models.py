@@ -3,6 +3,7 @@ from decimal import Decimal
 from pydantic import EmailStr,BaseModel
 from sqlmodel import Field, Relationship, SQLModel,Session,create_engine,select
 import datetime
+from .cpf import generate_cpf
 from sqlalchemy import LargeBinary
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
@@ -18,13 +19,13 @@ class dieta_refeicoes(SQLModel,table=True):
     id_ref_noite: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id")
 
 class TreinadorBase(SQLModel):
-    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
+    telefone: str | None = Field(max_length=11,default=None,unique=True)
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
 
 # Properties to receive via API on update, all are optional
 class TreinadorUpdate(TreinadorBase):
-    telefone: str | None = Field(max_length=11,default=None,unique=True,foreign_key= "telefone.telefone")
+    telefone: str | None = Field(max_length=8,default=None,unique=True)
     especialidade: str | None = Field(default=None, min_length=8, max_length=40)
 
     
@@ -34,8 +35,10 @@ class Treinador(TreinadorBase, table=True):
 class TreinadorPublic(SQLModel):
     id: Optional[str]
     name: Optional[str] 
+    telefone: Optional[str]
     especialidade: Optional[str]
     telefone: Optional[str]
+    local_de_treino: Optional[str]
 class TreinadoresPublic(SQLModel):
     data: list[TreinadorPublic]
     count: int
@@ -44,19 +47,26 @@ class TreinadorCreate(SQLModel):
     id: str = Field(default=None, primary_key=True,max_length=11)
     name: str | None = Field(default=None, max_length=255)
     especialidade: str | None = Field(default=None, max_length=255)
-class TelefoneBase(SQLModel):
-    telefone: str = Field(default=None, primary_key=True,max_length=11)
+    telefone: str | None = Field(max_length=8,default=None,unique=True)
+class LocalBase(SQLModel):
+    nome_local: str = Field(default=None, max_length=255)
+    
+class Local(LocalBase,table=True):
+    id: int = Field(default=None, primary_key=True)
 
-class Telefone(TelefoneBase,table=True):
-    pass
-
-class TelefoneCreate(TelefoneBase):
-    telefone: str = Field(default=None, primary_key=True,max_length=11)
-
-class treinador_telefones(SQLModel,table=True):
+class treinador_locais(SQLModel,table=True):
     treinador_id: str = Field(default=None, primary_key=True,max_length=11,foreign_key="treinador.id")
-    telefone_id: str = Field(default=None, primary_key=True,max_length=11 ,foreign_key="telefone.telefone")
+    local_id: int = Field(default=None, primary_key=True,foreign_key="local.id")
+    
 
+class LocalPublic(Local):
+    pass
+class LocaisPublic(SQLModel):
+    data: list[LocalPublic]
+    count: int
+    
+class LocalCreate(LocalBase):
+    id: int = Field(default=None, primary_key=True)
 
 # Shared properties
 class UserBase(SQLModel):
@@ -68,9 +78,11 @@ class UserBase(SQLModel):
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
+    cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     password: str = Field(min_length=8, max_length=40)
 
 class UserRegister(SQLModel):
+    cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
     name: str | None = Field(default=None, max_length=255)
@@ -104,62 +116,9 @@ class UserPublic(UserBase):
     email: str
     id: int
 
-
-class TelefonePublic(Telefone):
-    pass
-
-class TelefonesPublic(SQLModel):
-    data: list[TelefonePublic]
-    count: int
-    
-# class ItemsPublic(SQLModel):
-#     data: list[ItemPublic]
-#     count: int
-
 class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
-
-
-# # Shared properties
-# class ItemBase(SQLModel):
-#     title: str = Field(min_length=1, max_length=255)
-#     description: str | None = Field(default=None, max_length=255)
-
-
-# # Properties to receive on item creation
-# class ItemCreate(ItemBase):
-#     pass
-
-
-# # Properties to receive on item update
-# class ItemUpdate(ItemBase):
-#     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
-
-
-# Database model, database table inferred from class name
-# class Item(ItemBase, table=True):
-    # id: uuid.UUID = Field(default_factory=None, primary_key=True)
-    # title: str = Field(max_length=255)
-# # Database model, database table inferred from class name
-# class Item(ItemBase, table=True):
-#     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-#     title: str = Field(max_length=255)
-#     owner_id: uuid.UUID = Field(
-#         foreign_key="user.id", nullable=False, ondelete="CASCADE"
-#     )
-#     owner: User | None = Relationship(back_populates="items")
-
-# # Properties to return via API, id is always required
-# class ItemPublic(ItemBase):
-#     id: uuid.UUID
-#     owner_id: uuid.UUID
-
-
-# class ItemsPublic(SQLModel):
-#     data: list[ItemPublic]
-#     count: int
-
 
 # Generic message
 class Message(SQLModel):
@@ -192,9 +151,6 @@ class Refeicao(RefeicaoBase, table=True):
     id: int = Field(default=None, primary_key=True)
 
     
-# Update forward references for the SQLModel
-Refeicao.update_forward_refs()
-    
 class RefeicaoCreate(RefeicaoBase):
     id: int = Field(default=None, primary_key=True)
     name: str = Field(default=None, max_length=255)
@@ -218,12 +174,25 @@ class ExercicioBase(SQLModel):
 class Exercicio(ExercicioBase, table=True):
     id: int = Field(default_factory=None, primary_key=True)
 
-class ExercicioCreate(ExercicioBase):
+class ExercicioCreate(SQLModel):
     id: int = Field(default_factory=None, primary_key=True)
-
+    exercicio: str = Field(default_factory=None)
+    grupo_muscular: str | None = Field(default=None)
 class ExercicioPublic(Exercicio):
-    pass
+    id: int
+    exercicio: str
+    grupo_muscular: str 
     
+class ExercicioQueryPublic(SQLModel):
+    id: int
+    exercicio: str
+    grupo_muscular: str 
+
+
+class ExerciciosQueryPublic(SQLModel):
+    data: list[ExercicioQueryPublic]
+    count: int
+
 
 class ExerciciosPublic(SQLModel):
     data: list[ExercicioPublic]
@@ -297,7 +266,7 @@ class Dieta(DietaBase,table=True):
 
 class DietaCreate(DietaBase):
     id: int
-class DietaUpdate(DietaBase):
+class DietaUpdate(SQLModel):
     id_ref_manha: Optional[int]
     id_ref_tarde: Optional[int]
     id_ref_noite: Optional[int]
@@ -384,9 +353,11 @@ class ShapeCreate(Shape):
 class ShapeDelete(Shape):
     pass
 
-class ShapePublic(Shape):
+class ShapePublic(SQLModel):
+    id: int
+    nome_foto: str
     foto: str | None = None  # Use str to store base64 encoded string
-
+    usuario_id: int
     @classmethod
     def from_orm(cls, shape):
         # Base64 encode the binary data

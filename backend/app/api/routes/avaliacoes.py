@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
+from sqlmodel import func, select, text
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
@@ -11,7 +11,9 @@ from app.models import (
     AvaliacaoCreate,
     AvaliacaoPublic,
     AvaliacaoUpdate,
-    AvaliacoesPublic
+    AvaliacoesPublic,
+    Plano,
+    Message
 )
 
 router = APIRouter()

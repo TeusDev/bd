@@ -3,8 +3,11 @@ from typing import Any
 from sqlmodel import Session, select
 import io
 
+<<<<<<< HEAD
 from datetime import datetime
 
+=======
+>>>>>>> merge-jp-lucas-teusdev-thfer
 from fastapi import (
     APIRouter, 
     HTTPException,
@@ -34,6 +37,7 @@ from app.models import (
 )
 
 router = APIRouter()
+<<<<<<< HEAD
 
 @router.post("/shapes/", response_model=ShapePublic)
 async def create_upload_file(
@@ -49,6 +53,21 @@ async def create_upload_file(
     session.add(new_shape)
     session.commit()
     session.refresh(new_shape)
+=======
+@router.post("/shapes/", response_model=ShapePublic)
+async def create_upload_file(
+    session: SessionDep,
+    id: int,
+    nome_foto: str,
+    file: UploadFile = File(...)
+):
+    contents = await file.read()
+    new_shape = Shape(id=id,nome_foto=nome_foto, foto=contents)
+    session.add(new_shape)
+    session.commit()
+    session.refresh(new_shape)
+
+>>>>>>> merge-jp-lucas-teusdev-thfer
     return ShapePublic.from_orm(new_shape)
 
 @router.get("/shapes/{shape_id}/foto")
@@ -61,6 +80,7 @@ async def get_foto(session: SessionDep, id: int):
 
     return StreamingResponse(io.BytesIO(shape.foto), media_type="image/png")
 
+<<<<<<< HEAD
 @router.get("/shapes/fotos")
 async def get_fotos(
     session: SessionDep, 
@@ -126,3 +146,16 @@ async def delete_foto(
     session.commit()
     
     return {"detail": "Shape deleted successfully"}
+=======
+@router.delete("/shapes/{shape_id}/delete_photo", response_model=ShapePublic)
+async def delete_photo(session: SessionDep, shape_id: int):
+    shape = session.query(Shape).filter(Shape.id == shape_id).first()
+
+    if not shape or not shape.foto:
+        raise HTTPException(status_code=404, detail="Shape or photo not found")
+
+    session.delete(shape)
+    session.commit()
+
+    return ShapePublic.from_orm(shape)
+>>>>>>> merge-jp-lucas-teusdev-thfer

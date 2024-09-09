@@ -2,7 +2,11 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+<<<<<<< HEAD
 from sqlmodel import col, delete, func, select
+=======
+from sqlmodel import col, delete, func, select,text
+>>>>>>> merge-jp-lucas-teusdev-thfer
 import re
 from app import crud
 from app.api.deps import (
@@ -18,6 +22,11 @@ from app.models import (
     ExercicioBase,
     ExercicioCreate,
     ExercicioPublic,
+<<<<<<< HEAD
+=======
+    ExercicioQueryPublic,
+    ExerciciosQueryPublic,
+>>>>>>> merge-jp-lucas-teusdev-thfer
     ExerciciosPublic,
     Message
 )
@@ -75,3 +84,110 @@ def delete_exercicio(
     session.commit()
     return Message(message="Exercicio deleted successfully")
 
+<<<<<<< HEAD
+=======
+
+
+def create_view_por_grupos(session: SessionDep):
+    """
+    Create a view that filters exercises for the muscle group 'Pernas' in any context.
+    """
+    create_view_sql = text("""
+        CREATE OR REPLACE VIEW exercicios_com_pernas AS
+        SELECT exercicio, grupo_muscular,id
+        FROM exercicio
+        WHERE grupo_muscular ILIKE '%Pernas%';    """)
+    session.execute(create_view_sql)
+    session.commit()
+
+def get_exercicios_com_pernas(session: SessionDep) -> ExerciciosQueryPublic:
+    """
+    Retrieve exercicios from the view for any context containing 'Pernas'.
+    """
+    # Criando a view que filtra por 'Pernas'
+    create_view_por_grupos(session)
+    
+    # Query para buscar os exercícios da view
+    query = text("""
+        SELECT id,exercicio, grupo_muscular
+        FROM exercicios_com_pernas
+    """)
+    result = session.execute(query)
+    exercicios = result.fetchall()
+
+    # Convertendo os resultados para instâncias de ExercicioPublic
+    exercicios_list = [ExercicioQueryPublic(id=row[0],exercicio=row[1], grupo_muscular=row[2]) for row in exercicios]
+    
+    # Contando os exercícios
+    count_query = text("""
+        SELECT COUNT(*)
+        FROM exercicios_com_pernas
+    """)
+    count_result = session.execute(count_query)
+    count = count_result.scalar()
+    
+    # Retornando os resultados
+    return ExerciciosQueryPublic(data=exercicios_list, count=count)
+
+# Exemplo de uso
+@router.get(
+    "/exercicios_com_pernas",
+    response_model=ExerciciosQueryPublic
+)
+def read_exercicios_com_pernas(session: SessionDep) -> ExerciciosQueryPublic:
+    """
+    Retrieve exercicios for any context containing 'Pernas' from the view.
+    """
+    return get_exercicios_com_pernas(session)
+
+
+
+
+
+
+def create_view_cardio(session: SessionDep):
+    """
+    Create a view that filters exercises for the muscle group 'Cardio' in any context.
+    """
+    create_view_sql = text("""
+        CREATE OR REPLACE VIEW exercicios_cardio AS
+        SELECT exercicio, grupo_muscular,id
+        FROM exercicio
+        WHERE grupo_muscular ILIKE '%Cardio%';    """)
+    session.execute(create_view_sql)
+    session.commit()
+
+def get_exercicios_cardio(session: SessionDep) -> ExerciciosQueryPublic:
+    """
+    Retrieve exercicios from the view for any context containing 'Cardio'.
+    """
+    create_view_cardio(session)
+    
+    query = text("""
+        SELECT id,exercicio, grupo_muscular
+        FROM exercicios_cardio
+    """)
+    result = session.execute(query)
+    exercicios = result.fetchall()
+
+    exercicios_list = [ExercicioQueryPublic(id=row[0],exercicio=row[1], grupo_muscular=row[2]) for row in exercicios]
+    
+    count_query = text("""
+        SELECT COUNT(*)
+        FROM exercicios_cardio
+    """)
+    count_result = session.execute(count_query)
+    count = count_result.scalar()
+    
+    return ExerciciosQueryPublic(data=exercicios_list, count=count)
+
+@router.get(
+    "/exercicios_cardio",
+    response_model=ExerciciosQueryPublic
+)
+def read_exercicios_cardio(session: SessionDep) -> ExerciciosQueryPublic:
+    """
+    Retrieve exercicios for any context containing 'Cardio' from the view.
+    """
+    return get_exercicios_cardio(session)
+>>>>>>> merge-jp-lucas-teusdev-thfer

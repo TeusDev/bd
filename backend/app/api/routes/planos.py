@@ -13,7 +13,8 @@ from app.models import (
     PlanosPublic,
     PlanoUpdate,
     PlanoPublic,
-    Avaliacao
+    Avaliacao,
+    Message
 )
 
 router = APIRouter()
@@ -81,3 +82,41 @@ def create_planos(
     session.commit()
     session.refresh(planes)
     return planes
+
+@router.put("/planos/{plano_id}", response_model=PlanoPublic)
+def update_plano(
+    session: SessionDep,
+    plano_id: int,
+    plano_in: PlanoUpdate
+) -> Any:
+    """
+    Update an existing Plano.
+    """
+    plano = session.query(Plano).filter(Plano.id == plano_id).first()
+
+    if not plano:
+        raise HTTPException(status_code=404, detail="Plano not found")
+    
+    for key, value in plano_in.dict(exclude_unset=True).items():
+        setattr(plano, key, value)
+
+    # Commit the changes to the database
+    session.commit()
+    session.refresh(plano)
+
+    # Return the updated Plano
+    return PlanoPublic.from_orm(plano)
+
+@router.delete("/{id}")
+def delete_plano(
+    *,session: SessionDep, id: int
+) -> Message:
+    """
+    Delete uma plano.
+    """
+    plano = session.get(Plano, id)
+    if not plano:
+        raise HTTPException(status_code=404, detail="Plano not found")
+    session.delete(plano)
+    session.commit()
+    return Message(message="Plano deleted successfully")

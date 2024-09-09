@@ -16,6 +16,7 @@ from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.models import (
     Dieta,
+    Message,
     DietaCreate,
     DietaPublic,
     DietasPublic,
@@ -117,6 +118,26 @@ def create_dieta(*, session: SessionDep, dieta_in: DietaCreate,
 
     
     dieta = crud.create_dieta(refeicoes_ids=[id_ref_manha,id_ref_tarde,id_ref_noite],session=session,dieta_create=dieta_in)
+    
+    dieta_ref = dieta_refeicoes(
+        id_dieta=dieta_in.id,
+        id_ref_manha=id_ref_manha,
+        id_ref_tarde=id_ref_tarde,
+        id_ref_noite=id_ref_noite
+    )
+    
+    statement = select(dieta_refeicoes).where(dieta_refeicoes.id_dieta ==dieta_in.id
+                                              and id_ref_manha==id_ref_manha
+                                              and id_ref_tarde==id_ref_tarde
+                                              and id_ref_noite == id_ref_noite)
+    warnings = session.exec(statement).first()
+    if warnings:
+        return Message(Message="relacao entre dieta e refeições ja existe")
+    
+    session.add(dieta_ref)
+    session.commit()
+    session.refresh(dieta_ref)
+    
     sql_query = text("""
     SELECT 
         dieta.id AS id_dieta,
@@ -160,27 +181,26 @@ def get_dieta(*, session: SessionDep, dieta_id: int):
     """
     Retrieve a single dieta by ID.
     """
-    # dieta = crud.get_dieta(session, dieta_id=dieta_id)
     sql_query = text("""
     SELECT 
-        dieta_id AS id_dieta,
+        dieta.id ,
         r_manha.name AS nome_ref_manha,
         r_tarde.name AS nome_ref_tarde,
         r_noite.name AS nome_ref_noite
     FROM 
         dieta
-    LEFT JOIN 
-        dieta_refeicoes ON dieta_id = dieta_refeicoes.id_dieta
-    LEFT JOIN 
+    INNER JOIN 
+        dieta_refeicoes ON dieta.id = dieta_refeicoes.id_dieta
+    INNER JOIN 
         refeicao AS r_manha ON dieta_refeicoes.id_ref_manha = r_manha.id
-    LEFT JOIN 
+    INNER JOIN 
         refeicao AS r_tarde ON dieta_refeicoes.id_ref_tarde = r_tarde.id
-    LEFT JOIN 
+    INNER JOIN 
         refeicao AS r_noite ON dieta_refeicoes.id_ref_noite = r_noite.id
     WHERE 
-        dieta_id = :dieta_id
+        dieta.id = :dieta_id
     LIMIT :limit OFFSET :skip
-    """)
+""")
     result = session.execute(
     sql_query,
     {"dieta_id": dieta_id, "limit": 1, "skip": 0}
@@ -211,34 +231,46 @@ def update_dieta(*, session: SessionDep, dieta_id: int, dieta_in: DietaUpdate) -
     """
     Update a dieta by ID.
     """
-    dieta = crud.get_dieta(session=session, dieta_id=dieta_in.id)
+    # Fetch the existing dieta record
+    dieta = crud.get_dieta(session=session, id=dieta_id)
     if not dieta:
         raise HTTPException(
             status_code=404,
             detail="Dieta not found.",
-    )
+        )
 
+    # Update dieta_refeicoes with new values
     sql_query = text("""
     UPDATE dieta_refeicoes
     SET 
-        id_ref_manha = dieta_in.id_ref_manha,
-        id_ref_tarde = dieta_in.id_ref_tarde,
-        id_ref_noite = dieta_in.id_ref_noite
+        id_ref_manha = :id_ref_manha,
+        id_ref_tarde = :id_ref_tarde,
+        id_ref_noite = :id_ref_noite
     WHERE 
         id_dieta = :dieta_id;
     """)
-    result = session.execute(sql_query)
+    session.execute(
+        sql_query,
+        {
+            "id_ref_manha": dieta_in.id_ref_manha,
+            "id_ref_tarde": dieta_in.id_ref_tarde,
+            "id_ref_noite": dieta_in.id_ref_noite,
+            "dieta_id": dieta_id
+        }
+    )
+    session.commit()  # Commit the update
 
+    # Query the updated dieta and associated refeicoes
     sql_query = text("""
     SELECT 
-        dieta_id AS id_dieta,
+        dieta.id AS id_dieta,
         r_manha.name AS nome_ref_manha,
         r_tarde.name AS nome_ref_tarde,
         r_noite.name AS nome_ref_noite
     FROM 
         dieta
     LEFT JOIN 
-        dieta_refeicoes ON dieta_id = dieta_refeicoes.id_dieta
+        dieta_refeicoes ON dieta.id = dieta_refeicoes.id_dieta
     LEFT JOIN 
         refeicao AS r_manha ON dieta_refeicoes.id_ref_manha = r_manha.id
     LEFT JOIN 
@@ -246,40 +278,59 @@ def update_dieta(*, session: SessionDep, dieta_id: int, dieta_in: DietaUpdate) -
     LEFT JOIN 
         refeicao AS r_noite ON dieta_refeicoes.id_ref_noite = r_noite.id
     WHERE 
-        dieta_id = :dieta_id
+        dieta.id = :dieta_id
     LIMIT :limit OFFSET :skip
     """)
     result = session.execute(
-    sql_query,
-    {"dieta_id": dieta_id, "limit": 1, "skip": 0}
+        sql_query,
+        {"dieta_id": dieta_id, "limit": 1, "skip": 0}
     )
-    
-    dietas = [
-        DietaPublic(
-            id=row[0],
-            nome_ref_manha=row[1],
-            nome_ref_tarde=row[2],
-            nome_ref_noite=row[3]
-        )
-        for row in result
-    ]
-    dieta_public = dietas[0]
+
+    # Use result.mappings() to get the row as a dictionary-like object
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Dieta not found after update.")
+
+    # Create a DietaPublic object from the row data
+    dieta_public = DietaPublic(
+        id=row["id_dieta"],
+        nome_ref_manha=row["nome_ref_manha"],
+        nome_ref_tarde=row["nome_ref_tarde"],
+        nome_ref_noite=row["nome_ref_noite"]
+    )
+
     return dieta_public
 
 @router.delete(
         "/{dieta_id}",
-        response_model=DietaPublic
+        response_model=Message
 )
 def delete_dieta(*, session: SessionDep, dieta_id: int) -> Any:
     """
     Delete a dieta by ID.
     """
-    dieta = crud.get_dieta(session=session, dieta_id=dieta_id)
+    # Fetch the existing dieta record
+    dieta = crud.get_dieta(session=session, id=dieta_id)
     if not dieta:
         raise HTTPException(
             status_code=404,
             detail="Dieta not found.",
-    )
+        )
 
-    crud.delete_dieta(session=session, dieta_id=dieta_id)
-    return dieta
+    # Delete dieta_refeicoes associated with this dieta
+    sql_query = text("""
+    DELETE FROM dieta_refeicoes
+    WHERE id_dieta = :dieta_id;
+    """)
+    session.execute(sql_query, {"dieta_id": dieta_id})
+
+    # Delete the dieta itself
+    sql_query = text("""
+    DELETE FROM dieta
+    WHERE id = :dieta_id;
+    """)
+    session.execute(sql_query, {"dieta_id": dieta_id})
+    
+    session.commit()  # Commit the changes
+
+    return Message(message="Deleted dieta")

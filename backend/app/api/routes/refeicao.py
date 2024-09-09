@@ -2,7 +2,11 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+<<<<<<< HEAD
 from sqlmodel import col, delete, func, select
+=======
+from sqlmodel import col, delete, func, select,text
+>>>>>>> merge-jp-lucas-teusdev-thfer
 
 from app import crud
 from app.api.deps import (
@@ -17,7 +21,12 @@ from app.models import (
     RefeicaoCreate,
     RefeicaoPublic,
     RefeicoesPublic,
+<<<<<<< HEAD
     RefeicaoUpdate
+=======
+    RefeicaoUpdate,
+    Message
+>>>>>>> merge-jp-lucas-teusdev-thfer
 )
 from app.utils import generate_new_account_email, send_email
 
@@ -81,8 +90,14 @@ def get_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
 )
 def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: RefeicaoUpdate) -> Any:
     """
+<<<<<<< HEAD
     Update a refeicao by ID.
     """
+=======
+    Update a refeicao by ID, including updating the name and calorias.
+    """
+    # Fetch the existing refeicao record
+>>>>>>> merge-jp-lucas-teusdev-thfer
     refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
     if not refeicao:
         raise HTTPException(
@@ -90,6 +105,7 @@ def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: Refei
             detail="Refeicao not found.",
         )
 
+<<<<<<< HEAD
     refeicao = crud.update_refeicao(
         session=session, 
         refeicao_id=refeicao_id, 
@@ -105,6 +121,39 @@ def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
     """
     Delete a refeicao by ID.
     """
+=======
+    # Update the refeicao record
+    sql_query = text("""
+    UPDATE refeicao
+    SET name = :name,
+        calorias = :calorias
+    WHERE id = :refeicao_id;
+    """)
+    session.execute(
+        sql_query,
+        {
+            "name": refeicao_in.name,
+            "calorias": refeicao_in.calorias,  # Assuming you have a calorias field in RefeicaoUpdate
+            "refeicao_id": refeicao_id
+        }
+    )
+
+    session.commit()  # Commit the changes
+
+    # Return the updated refeicao
+    updated_refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
+    return updated_refeicao
+
+@router.delete(
+        "/{refeicao_id}",
+        response_model=Message
+)
+def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
+    """
+    Delete a refeicao by ID, including related dieta and dieta_refeicoes.
+    """
+    # Fetch the existing refeicao record
+>>>>>>> merge-jp-lucas-teusdev-thfer
     refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
     if not refeicao:
         raise HTTPException(
@@ -112,5 +161,55 @@ def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
             detail="Refeicao not found.",
         )
 
+<<<<<<< HEAD
     crud.delete_refeicao(session=session, refeicao_id=refeicao_id)
     return refeicao
+=======
+    # Check if the refeicao is associated with any dietas
+    sql_query = text("""
+    SELECT id_dieta 
+    FROM dieta_refeicoes
+    WHERE id_ref_manha = :refeicao_id
+       OR id_ref_tarde = :refeicao_id
+       OR id_ref_noite = :refeicao_id;
+    """)
+    result = session.execute(sql_query, {"refeicao_id": refeicao_id})
+    dieta_ids = result.fetchall()
+
+    # If there are any dietas associated, delete them
+    if dieta_ids:
+        for dieta in dieta_ids:
+            # Delete dieta_refeicoes associated with this dieta
+            sql_query = text("""
+            DELETE FROM dieta_refeicoes
+            WHERE id_dieta = :dieta_id;
+            """)
+            session.execute(sql_query, {"dieta_id": dieta.id_dieta})
+
+            # Delete the dieta itself
+            sql_query = text("""
+            DELETE FROM dieta
+            WHERE id = :dieta_id;
+            """)
+            session.execute(sql_query, {"dieta_id": dieta.id_dieta})
+
+    # Delete the entries in dieta_refeicoes where refeicao_id is used
+    sql_query = text("""
+    DELETE FROM dieta_refeicoes
+    WHERE id_ref_manha = :refeicao_id
+       OR id_ref_tarde = :refeicao_id
+       OR id_ref_noite = :refeicao_id;
+    """)
+    session.execute(sql_query, {"refeicao_id": refeicao_id})
+
+    # Delete the refeicao itself
+    sql_query = text("""
+    DELETE FROM refeicao
+    WHERE id = :refeicao_id;
+    """)
+    session.execute(sql_query, {"refeicao_id": refeicao_id})
+    
+    session.commit()  # Commit the changes
+
+    return Message(message="Deleted refeicao and associated dietas")
+>>>>>>> merge-jp-lucas-teusdev-thfer

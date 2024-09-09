@@ -84,6 +84,7 @@ class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
     name: str | None = Field(default=None, max_length=255)
+    id: Optional[int] = Field(default=None, primary_key=True)
 
 
 # Properties to receive via API on update, all are optional

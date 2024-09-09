@@ -126,6 +126,11 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
     session_user = session.exec(statement).first()
     return session_user
 
+def get_user_by_id(*, session: Session, id: int) -> User | None:
+    statement = select(User).where(User.id == id)
+    session_user = session.exec(statement).first()
+    return session_user
+
 def get_exercicios(*, session: Session, id: int) -> Exercicio | None:
     statement = select(Exercicio).where(Exercicio.id == id)
     exercicios = session.exec(statement).first()

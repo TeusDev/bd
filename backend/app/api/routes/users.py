@@ -156,6 +156,33 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     user = crud.create_user(session=session, user_create=user_create)
     return user
 
+@router.post("/signup_superuser", response_model=UserPublic)
+def register_superuser(session: SessionDep, user_in: UserRegister) -> Any:
+    """
+    Motivos Didáticos - Mostrar novo usuário
+    """
+    user = crud.get_user_by_email(session=session, email=user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=400,
+            detail="The user with this email already exists in the system",
+        )
+    user2 = crud.get_user_by_email(session=session, id=user_in.id)
+    if user2:
+        raise HTTPException(
+            status_code=400,
+            detail="The user with this id already exists in the system",
+        )
+    
+    user_create = User.model_validate(user_in,update={"hashed_password": get_password_hash(user_create.password)})
+ 
+    session.add(user_create)
+    session.commit()
+    session.refresh(user_create)
+    
+    
+    return user_create
+
 @router.get("/{user_id}", response_model=UserPublic)
 def read_user_by_id(
     user_id: int, session: SessionDep, current_user: CurrentUser

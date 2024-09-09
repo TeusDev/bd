@@ -13,10 +13,10 @@ from typing import TYPE_CHECKING, Optional,List
 
 
 class dieta_refeicoes(SQLModel,table=True):
-    id_dieta:     int = Field(default_factory=None, primary_key=True,foreign_key="dieta.id")
-    id_ref_manha: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id")
-    id_ref_tarde: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id")
-    id_ref_noite: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id")
+    id_dieta:     int = Field(default_factory=None, primary_key=True,foreign_key="dieta.id", ondelete="CASCADE")
+    id_ref_manha: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id", ondelete="CASCADE")
+    id_ref_tarde: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id", ondelete="CASCADE")
+    id_ref_noite: int = Field(default_factory=None, primary_key=True,foreign_key="refeicao.id", ondelete="CASCADE")
 
 class TreinadorBase(SQLModel):
     telefone: str | None = Field(max_length=11,default=None,unique=True)
@@ -55,8 +55,8 @@ class Local(LocalBase,table=True):
     id: int = Field(default=None, primary_key=True)
 
 class treinador_locais(SQLModel,table=True):
-    treinador_id: str = Field(default=None, primary_key=True,max_length=11,foreign_key="treinador.id")
-    local_id: int = Field(default=None, primary_key=True,foreign_key="local.id")
+    treinador_id: str = Field(default=None, primary_key=True,max_length=11,foreign_key="treinador.id", ondelete="CASCADE")
+    local_id: int = Field(default=None, primary_key=True,foreign_key="local.id", ondelete="CASCADE")
     
 
 class LocalPublic(Local):
@@ -114,6 +114,7 @@ class User(UserBase, table=True):
 class UserPublic(UserBase):
     email: str
     id: int
+    name:str | None
 
 class UsersPublic(SQLModel):
     data: list[UserPublic]
@@ -218,8 +219,8 @@ class TreinosPublic(SQLModel):
     count: int
     
 class treino_exercicio(SQLModel,table=True):
-    id_treino: int = Field(default=None, foreign_key="treino.id",primary_key=True)
-    id_exercicio: int = Field(default=None, foreign_key="exercicio.id",primary_key=True)
+    id_treino: int = Field(default=None, foreign_key="treino.id",primary_key=True, ondelete="CASCADE")
+    id_exercicio: int = Field(default=None, foreign_key="exercicio.id",primary_key=True, ondelete="CASCADE")
 
 class SessaoBase(SQLModel):
     data: datetime.datetime = Field(default_factory=datetime.datetime.utcnow, nullable=False)
@@ -252,10 +253,10 @@ class SessoesPublic(SQLModel):
     count: int
 
 class treino_sessao(SQLModel,table=True):
-    id_treino1: int = Field(default=None, foreign_key="treino.id",primary_key=True)
-    id_treino2: int = Field(default=None, foreign_key="treino.id",primary_key=True)
-    id_treino3: int = Field(default=None, foreign_key="treino.id",primary_key=True)
-    id_sessao: int = Field(default=None, foreign_key="sessao.id",primary_key=True)
+    id_treino1: int = Field(default=None, foreign_key="treino.id",primary_key=True, ondelete="CASCADE")
+    id_treino2: int = Field(default=None, foreign_key="treino.id",primary_key=True, ondelete="CASCADE")
+    id_treino3: int = Field(default=None, foreign_key="treino.id",primary_key=True, ondelete="CASCADE")
+    id_sessao: int = Field(default=None, foreign_key="sessao.id",primary_key=True , ondelete="CASCADE")
 
 class DietaBase(SQLModel):
     id: int = Field(default_factory=None, primary_key=True)
@@ -283,16 +284,16 @@ class DietasPublic(SQLModel):
 
 class PlanoBase(SQLModel):
     id: int | None = Field(default_factory=None, primary_key=True)
-    id_user: int = Field(default_factory=None, primary_key=True,foreign_key="user.id")
-    id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
-    id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
-    id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
+    id_user: int = Field(default_factory=None, primary_key=True,foreign_key="user.id", ondelete="CASCADE")
+    id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id", ondelete="CASCADE")
+    id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id", ondelete="CASCADE")
+    id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id", ondelete="CASCADE")
 
 class PlanoCreate(PlanoBase):
     # id_user: int = Field(default_factory=None, foreign_key="user.id")
-    id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
-    id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
-    id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
+    id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id", ondelete="CASCADE")
+    id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id", ondelete="CASCADE")
+    id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id", ondelete="CASCADE")
 
 
 
@@ -303,7 +304,7 @@ class PlanoUpdate(PlanoBase):
     id_avaliacao : int | None = Field(default_factory = None)
 
 class Plano(PlanoBase, table=True):
-    id_dieta: int | None = Field(default_factory=None,foreign_key="dieta.id")
+    id_dieta: int | None = Field(default_factory=None,foreign_key="dieta.id", ondelete="CASCADE")
 
 class PlanoPublic(PlanoBase):
     pass
@@ -343,7 +344,7 @@ class AvaliacoesPublic(SQLModel):
     
 class ShapeBase(SQLModel):
     nome_foto: str = Field(default=None)
-    usuario_id: int | None = Field(default=None, foreign_key="user.id")
+    usuario_id: int | None = Field(default=None, foreign_key="user.id", ondelete="CASCADE")
 class Shape(ShapeBase, table=True):
     id: int | None = Field(default=None,primary_key=True) 
     foto: bytes | None = Field(default=None, sa_column=Column(LargeBinary))

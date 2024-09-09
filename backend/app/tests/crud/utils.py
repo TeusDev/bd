@@ -120,9 +120,6 @@ diet_meals = [
     "Frango grelhado com salada de espinafre",
     "Sopa de abobrinha com hortelã"
 ]
-<<<<<<< HEAD
-
-=======
 academias = [
     "Academia PowerFit",
     "Academia IronGym",
@@ -175,7 +172,6 @@ academias = [
     "Academia ProFit",
     "Academia FitnessPlus"
 ]
->>>>>>> merge-jp-lucas-teusdev-thfer
 exerciciosh = {
     "Agachamento": "Pernas",
     "Flexão de Braços": "Peito, Tríceps, Ombros",

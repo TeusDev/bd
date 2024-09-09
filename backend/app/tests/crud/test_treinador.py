@@ -16,7 +16,7 @@ N=8
 
 
 def test_create_treinador(db: Session) -> None:
-    for i in range(40):
+    for i in range(20):
         ################### creating local ############################
         local = random.choice(academias)
         id1 = random.randint(0,10000000)

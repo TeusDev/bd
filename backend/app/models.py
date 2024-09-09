@@ -70,7 +70,7 @@ class LocalCreate(LocalBase):
 
 # Shared properties
 class UserBase(SQLModel):
-    email: EmailStr = Field(unique=True, index=True, max_length=255)
+    email: EmailStr = Field(unique=True, index=True, max_length=255,primary_key=True)
     is_active: bool = True
     is_superuser: bool = False
     name: str | None = Field(default=None, max_length=255)
@@ -78,11 +78,9 @@ class UserBase(SQLModel):
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
-    cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     password: str = Field(min_length=8, max_length=40)
 
 class UserRegister(SQLModel):
-    cpf: str = Field(default=generate_cpf(),unique=True,max_length=11)
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=8, max_length=40)
     name: str | None = Field(default=None, max_length=255)
@@ -284,13 +282,14 @@ class DietasPublic(SQLModel):
 
 class PlanoBase(SQLModel):
     id: int | None = Field(default_factory=None, primary_key=True)
-    id_user: int = Field(default_factory=None, foreign_key="user.id")
+    id_user: int = Field(default_factory=None, primary_key=True,foreign_key="user.id")
+    email: EmailStr = Field(unique=True, index=True, max_length=255,primary_key=True,foreign_key="user.email")
     id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
     id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
     id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
 
 class PlanoCreate(PlanoBase):
-    id_user: int = Field(default_factory=None, foreign_key="user.id")
+    # id_user: int = Field(default_factory=None, foreign_key="user.id")
     id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id")
     id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id")
     id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id")
@@ -345,6 +344,7 @@ class AvaliacoesPublic(SQLModel):
 class ShapeBase(SQLModel):
     nome_foto: str = Field(default=None)
     usuario_id: int | None = Field(default=None, foreign_key="user.id")
+    email: EmailStr = Field(unique=True, index=True, max_length=255,primary_key=True,foreign_key="user.email")
 class Shape(ShapeBase, table=True):
     id: int | None = Field(default=None,primary_key=True) 
     foto: bytes | None = Field(default=None, sa_column=Column(LargeBinary))

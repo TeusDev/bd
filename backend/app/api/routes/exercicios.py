@@ -2,11 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-<<<<<<< HEAD
-from sqlmodel import col, delete, func, select
-=======
 from sqlmodel import col, delete, func, select,text
->>>>>>> merge-jp-lucas-teusdev-thfer
 import re
 from app import crud
 from app.api.deps import (
@@ -22,11 +18,8 @@ from app.models import (
     ExercicioBase,
     ExercicioCreate,
     ExercicioPublic,
-<<<<<<< HEAD
-=======
     ExercicioQueryPublic,
     ExerciciosQueryPublic,
->>>>>>> merge-jp-lucas-teusdev-thfer
     ExerciciosPublic,
     Message
 )
@@ -84,8 +77,6 @@ def delete_exercicio(
     session.commit()
     return Message(message="Exercicio deleted successfully")
 
-<<<<<<< HEAD
-=======
 
 
 def create_view_por_grupos(session: SessionDep):
@@ -190,4 +181,3 @@ def read_exercicios_cardio(session: SessionDep) -> ExerciciosQueryPublic:
     Retrieve exercicios for any context containing 'Cardio' from the view.
     """
     return get_exercicios_cardio(session)
->>>>>>> merge-jp-lucas-teusdev-thfer

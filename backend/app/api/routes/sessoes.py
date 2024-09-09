@@ -27,11 +27,7 @@ from app.models import (
     TreinoCreate,
     TreinoPublic,
     TreinosPublic,
-<<<<<<< HEAD
-    
-=======
     treino_sessao,
->>>>>>> merge-jp-lucas-teusdev-thfer
     Message
 )
 from app.utils import generate_new_account_email, send_email
@@ -52,42 +48,6 @@ def read_sessoes(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     count = session.exec(count_statement).one()
 
     sql_query = text("""
-<<<<<<< HEAD
-   SELECT 
-    sessao.id AS sessao_id,
-    sessao.data AS sessao_data,
-    sessao.duracao_minutos AS duracao_total,
-    e1.exercicio AS exercicio1,
-    e2.exercicio AS exercicio2,
-    e3.exercicio AS exercicio3,
-    e1.grupo_muscular AS grupo_muscular1,
-    e2.grupo_muscular AS grupo_muscular2,
-    e3.grupo_muscular AS grupo_muscular3,
-    COALESCE(t1.calorias, 0) + COALESCE(t2.calorias, 0) + COALESCE(t3.calorias, 0) AS calorias_gastas_total
-FROM 
-    sessao
-LEFT JOIN 
-    treino_sessao AS ts ON ts.id_sessao = sessao.id
-LEFT JOIN 
-    treino_exercicio AS te1 ON te1.id_treino = ts.id_treino1
-LEFT JOIN 
-    treino_exercicio AS te2 ON te2.id_treino = ts.id_treino2
-LEFT JOIN 
-    treino_exercicio AS te3 ON te3.id_treino = ts.id_treino3
-LEFT JOIN 
-    exercicio AS e1 ON e1.id = te1.id_exercicio
-LEFT JOIN 
-    exercicio AS e2 ON e2.id = te2.id_exercicio
-LEFT JOIN 
-    exercicio AS e3 ON e3.id = te3.id_exercicio
-LEFT JOIN 
-    treino AS t1 ON t1.id = ts.id_treino1
-LEFT JOIN 
-    treino AS t2 ON t2.id = ts.id_treino2
-LEFT JOIN 
-    treino AS t3 ON t3.id = ts.id_treino3
-LIMIT :limit OFFSET :skip""")
-=======
        SELECT 
         sessao.id AS sessao_id,
         sessao.data AS sessao_data,
@@ -123,7 +83,6 @@ LIMIT :limit OFFSET :skip""")
         exercicio AS e3 ON e3.id = te3.id_exercicio
     LIMIT :limit OFFSET :skip
     """)
->>>>>>> merge-jp-lucas-teusdev-thfer
 
     results = session.execute(sql_query, {"limit": limit, "skip": skip}).all()
 
@@ -190,9 +149,6 @@ def create_sessao(*, session: SessionDep,
         
     
     sessao = crud.create_sessao(session=session, sessao_create=sessao_in,treino_ids=[treino1,treino2,treino3])
-<<<<<<< HEAD
-  
-=======
     
     
     sessao_ref = treino_sessao(
@@ -215,7 +171,6 @@ def create_sessao(*, session: SessionDep,
     session.commit()
     session.refresh(sessao_ref)
 
->>>>>>> merge-jp-lucas-teusdev-thfer
 
     create_procedure_sql = text("""
         CREATE OR REPLACE FUNCTION get_total_calories(p_id_sessao INTEGER)  -- Renamed parameter

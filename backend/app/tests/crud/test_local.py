@@ -18,9 +18,10 @@ def test_create_local(db: Session) -> None:
     for i in range(20):
         local = random.choice(academias)
         id1 = random.randint(0,10000000)
-        local_in = TelefoneCreate(telefone=telefonez)
-        existing_telefone = crud.get_telefones(session=db, telefone=telefonez)
-        if existing_telefone:
+        local_in = LocalCreate(id=id1,nome_local=local)
+        statement = select(Local).where(Local.id == id1)
+        existing_locais = db.exec(statement).first()
+        if existing_locais:
             continue
         telefonek = crud.create_telefone(session=db, telefone_create=telefone_in)
         assert telefonek.telefone == telefonez

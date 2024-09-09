@@ -27,7 +27,7 @@ class TreinadorBase(SQLModel):
 class TreinadorUpdate(TreinadorBase):
     telefone: str | None = Field(max_length=8,default=None,unique=True)
     especialidade: str | None = Field(default=None, min_length=8, max_length=40)
-    
+
     
 class Treinador(TreinadorBase, table=True):
     id: str = Field(default=None, primary_key=True,max_length=11)
@@ -68,7 +68,6 @@ class LocaisPublic(SQLModel):
     
 class LocalCreate(LocalBase):
     id: int = Field(default=None, primary_key=True)
-    
 
 
 class TelefoneBase(SQLModel):

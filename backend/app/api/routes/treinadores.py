@@ -25,9 +25,6 @@ from app.models import (
     UserUpdate,
     UserUpdateMe,
     Local,
-    Telefone,
-    TelefoneCreate,
-    TelefonePublic,
     Treinador,
     TreinadorCreate,
     TreinadorPublic,
@@ -36,7 +33,6 @@ from app.models import (
     treinador_locais
 )
 from app.utils import generate_new_account_email, send_email
-from .telefones import create_telefone
 router = APIRouter()
 
 
@@ -64,7 +60,7 @@ def read_treinadores(session: SessionDep, skip: int = 0, limit: int = 100) -> An
     INNER JOIN 
         treinador_locais ON treinador.id = treinador_locais.treinador_id
     INNER JOIN 
-        local as local_de_treino ON treinador_locais.local_id = local.id
+        local as local_de_treino ON treinador_locais.local_id = local_de_treino.id
     LIMIT :limit OFFSET :skip
     """)
     

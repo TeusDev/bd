@@ -1,4 +1,3 @@
-from backend.app.api.routes import locais
 from fastapi import APIRouter
 
 
@@ -8,14 +7,14 @@ from app.api.routes import (
     dieta,
     users, 
     utils, 
-    telefones,
     treinadores,
     planos,
     avaliacoes,
     shapes,
     sessoes,
     treinos,
-    exercicios
+    exercicios,
+    locais
 )
 
 api_router = APIRouter()

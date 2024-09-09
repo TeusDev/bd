@@ -23,10 +23,6 @@ from app.models import (
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
-    Telefone,
-    TelefoneCreate,
-    TelefonePublic,
-    TelefonesPublic,
     Local,
     LocalBase,
     LocalCreate,
@@ -59,7 +55,7 @@ def read_locais(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 @router.post(
     "/",response_model=LocalPublic
 )
-def create_telefone(*, session: SessionDep, local_in: LocalCreate) -> Any:
+def create_local(*, session: SessionDep, local_in: LocalCreate) -> Any:
     """
     Create new local de treino.
     """

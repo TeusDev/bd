@@ -15,8 +15,7 @@ from app.models import (
     RefeicaoCreate,
     Dieta,
     DietaCreate, 
-    Telefone, 
-    TelefoneCreate,
+
     TreinadorCreate,
     Treinador,
     Avaliacao,
@@ -32,19 +31,11 @@ from app.models import (
     Treino,
     TreinoCreate,
     dieta_refeicoes,
-    treinador_telefones,
     treino_sessao,
     treino_exercicio
 )
 
-def create_telefone(*, session: Session, telefone_create: TelefoneCreate) -> Telefone:
-    db_obj = Telefone.model_validate(
-        telefone_create
-    )
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
+
 
 def create_exercicio(*, session: Session, exercicio_create: ExercicioCreate) -> Exercicio:
     db_obj = Exercicio.model_validate(
@@ -113,7 +104,7 @@ def create_plano(*,session:Session,plano_create:PlanoCreate) -> Plano:
     session.refresh(db_obj)
     return db_obj
 
-def create_treinador(*, session: Session, treinador_create: TreinadorCreate,telefone:str) -> Treinador | None:
+def create_treinador(*, session: Session, treinador_create: TreinadorCreate) -> Treinador | None:
     db_obj = Treinador.model_validate(
         treinador_create
     )
@@ -121,21 +112,6 @@ def create_treinador(*, session: Session, treinador_create: TreinadorCreate,tele
     session.commit()
     session.refresh(db_obj)
     
-    
-    
-    # telefone_ref = treinador_telefones(
-    #     treinador_id=treinador_create.id,
-    #     telefone_id=telefone
-    # )
-    
-    # statement = select(treinador_telefones).where(treinador_telefones.treinador_id == treinador_id)
-    # warnings = session.exec(statement).first()
-    # if warnings:
-    #     return None
-    
-    # session.add(telefone_ref)
-    # session.commit()
-    # session.refresh(telefone_ref)
     
     return db_obj
 
@@ -185,10 +161,6 @@ def get_sessoes(*, session: Session, id: int) -> Sessao | None:
     sessoes = session.exec(statement).first()
     return sessoes
 
-def get_telefones(*, session: Session, telefone: str) -> Telefone | None:
-    statement = select(Telefone).where(Telefone.telefone == telefone)
-    telefones = session.exec(statement).first()
-    return telefones
 
 def get_treinadores(*, session: Session, id: str) -> Treinador | None:
     statement = select(Treinador).where(Treinador.id == id)

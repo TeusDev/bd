@@ -60,29 +60,13 @@ class treinador_locais(SQLModel,table=True):
     
 
 class LocalPublic(Local):
-    telefone: str
-
+    pass
 class LocaisPublic(SQLModel):
     data: list[LocalPublic]
     count: int
     
 class LocalCreate(LocalBase):
     id: int = Field(default=None, primary_key=True)
-
-
-class TelefoneBase(SQLModel):
-    telefone: str = Field(default=None, primary_key=True,max_length=11)
-
-class Telefone(TelefoneBase,table=True):
-    pass
-
-class TelefoneCreate(TelefoneBase):
-    telefone: str = Field(default=None, primary_key=True,max_length=11)
-
-class treinador_telefones(SQLModel,table=True):
-    treinador_id: str = Field(default=None, primary_key=True,max_length=11,foreign_key="treinador.id")
-    telefone_id: str = Field(default=None, primary_key=True,max_length=11 ,foreign_key="telefone.telefone")
-
 
 # Shared properties
 class UserBase(SQLModel):
@@ -138,12 +122,6 @@ class UserPublic(UserBase):
     name: str
 
 
-class TelefonePublic(Telefone):
-    telefone: str
-
-class TelefonesPublic(SQLModel):
-    data: list[TelefonePublic]
-    count: int
     
 # class ItemsPublic(SQLModel):
 #     data: list[ItemPublic]

@@ -1,5 +1,5 @@
 from fastapi.encoders import jsonable_encoder
-from sqlmodel import Session
+from sqlmodel import Session,select
 
 from app import crud
 from app.core.security import verify_password
@@ -15,7 +15,7 @@ N = 8
 
 
 def test_create_local(db: Session) -> None:
-    for i in range(20):
+    for i in range(40):
         local = random.choice(academias)
         id1 = random.randint(0,10000000)
         local_in = LocalCreate(id=id1,nome_local=local)
@@ -23,6 +23,9 @@ def test_create_local(db: Session) -> None:
         existing_locais = db.exec(statement).first()
         if existing_locais:
             continue
-        telefonek = crud.create_telefone(session=db, telefone_create=telefone_in)
-        assert telefonek.telefone == telefonez
+        db_obj = Local.model_validate(local_in)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        assert db_obj.id == id1
 

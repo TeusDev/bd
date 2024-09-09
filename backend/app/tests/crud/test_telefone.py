@@ -13,7 +13,7 @@
 
 
 # def test_create_telefone(db: Session) -> None:
-#     for i in range(20):
+#     for i in range(40):
 #         telefonez = ''.join(secrets.choice(string.digits) for i in range(N))
 #         telefone_in = TelefoneCreate(telefone=telefonez)
 #         existing_telefone = crud.get_telefones(session=db, telefone=telefonez)

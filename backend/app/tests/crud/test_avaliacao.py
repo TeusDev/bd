@@ -15,7 +15,7 @@ from .utils import especialidades, random_datetime,start_date,end_date
 N=8
 
 def test_create_avaliacao(db: Session) -> None:
-    for i in range(20):
+    for i in range(40):
         
         id = random.randint(0,10000000)
         nome_foto=f"foto_{id}"

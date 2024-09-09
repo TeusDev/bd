@@ -1,9 +1,14 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Depends
 from sqlmodel import func, select, text
-
+from app import crud
+from app.api.deps import (
+    CurrentUser,
+    SessionDep,
+    get_current_active_superuser,
+)
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     Avaliacao,
@@ -69,7 +74,7 @@ def create_avaliacoes(
     session.refresh(aval)
     return aval
 
-@router.delete("/{avaliacao_id}")
+@router.delete("/{avaliacao_id}",  dependencies=[Depends(get_current_active_superuser)])
 def delete_avaliacao(
     *, session: SessionDep, avaliacao_id: int, current_user: CurrentUser
 ) -> Any:

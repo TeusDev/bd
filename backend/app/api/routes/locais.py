@@ -53,7 +53,7 @@ def read_locais(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 
 @router.post(
-    "/",response_model=LocalPublic
+    "/",response_model=LocalPublic,  dependencies=[Depends(get_current_active_superuser)]
 )
 def create_local(*, session: SessionDep, local_in: LocalCreate) -> Any:
     """
@@ -79,7 +79,7 @@ def create_local(*, session: SessionDep, local_in: LocalCreate) -> Any:
     session.refresh(db_obj)
     return db_obj
 
-@router.delete("/{local}")
+@router.delete("/{local}",  dependencies=[Depends(get_current_active_superuser)])
 def delete_local(
     session: SessionDep, local_id: int
 ) -> Message:

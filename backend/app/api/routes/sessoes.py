@@ -108,7 +108,7 @@ def read_sessoes(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 
 @router.post(
-    "/",response_model=SessaoPublic
+    "/",    dependencies=[Depends(get_current_active_superuser)],response_model=SessaoPublic
 )
 def create_sessao(*, session: SessionDep, 
                   sessao_in: SessaoCreate,
@@ -210,7 +210,7 @@ def create_sessao(*, session: SessionDep,
     )
     return sessoes
 
-@router.delete("/{sessao}")
+@router.delete("/{sessao}",  dependencies=[Depends(get_current_active_superuser)],)
 def delete_sessao(
     session: SessionDep, id: str
 ) -> Message:

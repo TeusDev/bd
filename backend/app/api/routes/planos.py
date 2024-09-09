@@ -1,7 +1,13 @@
 import uuid
 from typing import Any
+from app.api.deps import (
+    CurrentUser,
+    SessionDep,
+    get_current_active_superuser,
+)
+from app.core.security import get_password_hash, verify_password
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Depends
 from sqlmodel import func, select,text
 from .calorias import calculate_calories 
 from app.api.deps import CurrentUser, SessionDep
@@ -14,17 +20,31 @@ from app.models import (
     PlanoUpdate,
     PlanoPublic,
     Avaliacao,
-    Message
+    Message,  
+    User,
+    UserCreate,
+    UserPublic,
+    UserRegister,
+    UsersPublic,
+    UserUpdate,
+    UserUpdateMe
 )
 
 router = APIRouter()
 
 @router.get("/",response_model=PlanosPublic)
-def read_planos ( session: SessionDep, skip: int = 0, limit: int = 100
+def read_planos (current_user: CurrentUser,session: SessionDep, skip: int = 0, limit: int = 100
 ) -> Any:
-    count_statement = select(func.count()).select_from(Plano)
+    if current_user.is_superuser:     
+        count_statement = select(func.count()).select_from(Plano)
+        count = session.exec(count_statement).one()
+        statement = select(Plano).offset(skip).limit(limit)
+        planos = session.exec(statement).all()
+        return PlanosPublic(data=planos,count=count)
+    
+    count_statement = select(func.count()).select_from(Plano).where(Plano.id_user==current_user.id)
     count = session.exec(count_statement).one()
-    statement = select(Plano).offset(skip).limit(limit)
+    statement = select(Plano).where(Plano.id_user==current_user.id).offset(skip).limit(limit)
     planos = session.exec(statement).all()
     return PlanosPublic(data=planos,count=count)
 
@@ -71,7 +91,7 @@ def create_planos(
     
     plano = Plano(
         id=plano_in.id,
-        id_user=plano_in.id_dieta,
+        id_user=current_user.id,
         id_sessao_treino=plano_in.id_sessao_treino,
         id_treinador=plano_in.id_treinador,
         id_avaliacao=plano_in.id_avaliacao,
@@ -86,6 +106,7 @@ def create_planos(
 @router.put("/planos/{plano_id}", response_model=PlanoPublic)
 def update_plano(
     session: SessionDep,
+    current_user: CurrentUser,
     plano_id: int,
     plano_in: PlanoUpdate
 ) -> Any:
@@ -94,6 +115,9 @@ def update_plano(
     """
     plano = session.query(Plano).filter(Plano.id == plano_id).first()
 
+    if plano.id_user != current_user.id:
+        raise HTTPException(status_code=404, detail="Cant edit a plano that is not yours")
+    
     if not plano:
         raise HTTPException(status_code=404, detail="Plano not found")
     
@@ -109,12 +133,15 @@ def update_plano(
 
 @router.delete("/{id}")
 def delete_plano(
-    *,session: SessionDep, id: int
+    *,session: SessionDep, id: int,current_user:CurrentUser
 ) -> Message:
     """
     Delete uma plano.
     """
     plano = session.get(Plano, id)
+    if plano.id_user != current_user.id:
+        raise HTTPException(status_code=404, detail="Cant edit a plano that is not yours")
+    
     if not plano:
         raise HTTPException(status_code=404, detail="Plano not found")
     session.delete(plano)

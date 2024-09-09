@@ -47,7 +47,7 @@ def read_exercicios(session: SessionDep, skip: int = 0, limit: int = 100) -> Any
 
 
 @router.post(
-    "/",response_model=ExercicioPublic
+    "/",response_model=ExercicioPublic,  dependencies=[Depends(get_current_active_superuser)]
 )
 def create_exercicio(*, session: SessionDep, exercicio_in: ExercicioCreate) -> Any:
     """
@@ -63,7 +63,7 @@ def create_exercicio(*, session: SessionDep, exercicio_in: ExercicioCreate) -> A
     exercicio = crud.create_exercicio(session=session, exercicio_create=exercicio_in)
     return exercicio
 
-@router.delete("/{exercicio}")
+@router.delete("/{exercicio}",  dependencies=[Depends(get_current_active_superuser)])
 def delete_exercicio(
     session: SessionDep, id: str
 ) -> Message:

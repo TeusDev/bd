@@ -18,7 +18,14 @@ from app.models import (
     RefeicaoPublic,
     RefeicoesPublic,
     RefeicaoUpdate,
-    Message
+    Message,
+    User,
+    UserCreate,
+    UserPublic,
+    UserRegister,
+    UsersPublic,
+    UserUpdate,
+    UserUpdateMe
 )
 from app.utils import generate_new_account_email, send_email
 
@@ -45,6 +52,7 @@ def read_refeicoes(*, session: SessionDep, skip: int = 0, limit: int = 100) -> A
 
 @router.post(
     "/",
+    dependencies=[Depends(get_current_active_superuser)],
     response_model=RefeicaoPublic
 )
 def create_refeicao(*, session: SessionDep, refeicao_in: RefeicaoCreate) -> Any:
@@ -66,7 +74,7 @@ def create_refeicao(*, session: SessionDep, refeicao_in: RefeicaoCreate) -> Any:
         response_model=RefeicaoPublic)
 def get_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
     """
-    Delete a refeicao by ID.
+    Get a refeicao by ID.
     """
     refeicao = crud.get_refeicao(session=session, refeicao_id=refeicao_id)
     if not refeicao:
@@ -78,6 +86,7 @@ def get_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:
 
 @router.put(
         "/{refeicao_id}",
+        dependencies=[Depends(get_current_active_superuser)],
         response_model=RefeicaoPublic
 )
 def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: RefeicaoUpdate) -> Any:
@@ -116,6 +125,7 @@ def update_refeicao(*, session: SessionDep, refeicao_id: int, refeicao_in: Refei
 
 @router.delete(
         "/{refeicao_id}",
+        dependencies=[Depends(get_current_active_superuser)],
         response_model=Message
 )
 def delete_refeicao(*, session: SessionDep, refeicao_id: int) -> Any:

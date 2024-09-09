@@ -114,7 +114,7 @@ def read_treinadores_especialidade(session: SessionDep, especialidade:str,skip: 
 
 
 @router.post(
-    "/",response_model=TreinadorPublic
+    "/",response_model=TreinadorPublic,    dependencies=[Depends(get_current_active_superuser)]
 )
 def create_treinadores(*, session: SessionDep, treinador_in: TreinadorCreate,local_id:int) -> Any:
     """
@@ -207,7 +207,7 @@ def create_treinadores(*, session: SessionDep, treinador_in: TreinadorCreate,loc
     return treinadorz
 
 
-@router.delete("/{id}")
+@router.delete("/{id}",    dependencies=[Depends(get_current_active_superuser)])
 def delete_treinadores(
     session: SessionDep, 
     id: str
@@ -227,7 +227,7 @@ def delete_treinadores(
 
 @router.put(
     "/{telefone}", 
-    response_model=TreinadorPublic
+    response_model=TreinadorPublic,    dependencies=[Depends(get_current_active_superuser)]
     )
 def update_treinadores(
     *,

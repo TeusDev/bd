@@ -72,7 +72,7 @@ def read_treinos(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 
 @router.post(
-    "/",response_model=TreinoPublic
+    "/",response_model=TreinoPublic,    dependencies=[Depends(get_current_active_superuser)]
 )
 def create_treino(*, session: SessionDep, treino_in: TreinoCreate,exercicio_id:int) -> Any:
     """
@@ -116,7 +116,7 @@ def create_treino(*, session: SessionDep, treino_in: TreinoCreate,exercicio_id:i
     )
     return treinoz
 
-@router.delete("/{treino}")
+@router.delete("/{treino}",  dependencies=[Depends(get_current_active_superuser)])
 def delete_treino(
     session: SessionDep, id: str
 ) -> Message:

@@ -79,7 +79,7 @@ def read_dietas(session: SessionDep, skip: int = 0, limit: int = 100) -> DietasP
 
 @router.post(
     "/",
-    response_model=DietaPublic
+    response_model=DietaPublic,  dependencies=[Depends(get_current_active_superuser)]
 )
 def create_dieta(*, session: SessionDep, dieta_in: DietaCreate,
                 id_ref_manha:int,
@@ -225,7 +225,7 @@ def get_dieta(*, session: SessionDep, dieta_id: int):
 
 @router.put(
         "/{dieta_id}",
-        response_model=DietaPublic
+        response_model=DietaPublic,  dependencies=[Depends(get_current_active_superuser)]
 )
 def update_dieta(*, session: SessionDep, dieta_id: int, dieta_in: DietaUpdate) -> Any:
     """
@@ -303,7 +303,7 @@ def update_dieta(*, session: SessionDep, dieta_id: int, dieta_in: DietaUpdate) -
 
 @router.delete(
         "/{dieta_id}",
-        response_model=Message
+        response_model=Message,  dependencies=[Depends(get_current_active_superuser)]
 )
 def delete_dieta(*, session: SessionDep, dieta_id: int) -> Any:
     """

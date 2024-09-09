@@ -8,6 +8,7 @@ from datetime import datetime
 from fastapi import (
     APIRouter, 
     HTTPException,
+    Depends,
     UploadFile,
     File)
 
@@ -52,10 +53,12 @@ async def create_upload_file(
     return ShapePublic.from_orm(new_shape)
 
 @router.get("/shapes/{shape_id}/foto")
-async def get_foto(session: SessionDep, id: int):
+async def get_foto(current_user:CurrentUser,session: SessionDep, id: int):
     result = session.execute(select(Shape).where(Shape.id == id))
     shape = result.scalars().first()
-
+    if result.id != current_user.id:
+        raise HTTPException(status_code=404, detail="You can't see another person shape!")
+    
     if not shape or not shape.foto:
         raise HTTPException(status_code=404, detail="Shape or photo not found")
 

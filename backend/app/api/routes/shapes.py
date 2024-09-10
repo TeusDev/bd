@@ -56,7 +56,7 @@ async def create_upload_file(
 async def get_foto(current_user:CurrentUser,session: SessionDep, id: int):
     result = session.execute(select(Shape).where(Shape.id == id))
     shape = result.scalars().first()
-    if shape.id != current_user.id:
+    if shape.usuario_id != current_user.id:
         raise HTTPException(status_code=404, detail="You can't see another person shape!")
     
     if not shape or not shape.foto:
@@ -64,10 +64,10 @@ async def get_foto(current_user:CurrentUser,session: SessionDep, id: int):
 
     return StreamingResponse(io.BytesIO(shape.foto), media_type="image/png")
 
-@router.get("/shapes/fotos")
+@router.get("/shapes/fotos", dependencies=[Depends(get_current_active_superuser)])
 async def get_fotos(
     session: SessionDep, 
-    current_user: CurrentUser
+    current_user: CurrentUser,
 ):
     result = session.exec(select(Shape))
   
@@ -96,7 +96,7 @@ async def delete_foto(
     if not shape:
         raise HTTPException(status_code=404, detail="Shape not found")
     
-    if not current_user.is_superuser and shape.usuario_id != current_user.id:
+    if (not current_user.is_superuser) and shape.usuario_id != current_user.id:
         raise HTTPException(status_code=403, detail="Operation not permitted")
 
     session.delete(shape)

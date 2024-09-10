@@ -262,28 +262,19 @@ def update_plano(
     """
     plano = session.query(Plano).filter(Plano.id == plano_id).first()
 
-    if plano.id_user != current_user.id:
-        raise HTTPException(status_code=404, detail="Cant edit a plano that is not yours")
-    
     if not plano:
         raise HTTPException(status_code=404, detail="Plano not found")
-    
-    
-    planoz = Plano(
-        id=plano_id,
-        id_user=current_user.id,
-        id_sessao_treino=plano_in.id_sessao_treino,
-        id_treinador=plano_in.id_treinador,
-        id_avaliacao=plano_in.id_avaliacao
-    )
-    
+
+    if plano.id_user != current_user.id:
+        raise HTTPException(status_code=403, detail="Cannot edit a plano that is not yours")
+
     for key, value in plano_in.dict(exclude_unset=True).items():
-        setattr(planoz, key, value)
+        setattr(plano, key, value)
 
     session.commit()
-    session.refresh(planoz)
+    session.refresh(plano)
 
-    return Message(message="plano updated successfully")
+    return Message(message="Plano updated successfully")
 
 def get_dieta_by_min_calorias(session: SessionDep):
     procedure_call = text("""

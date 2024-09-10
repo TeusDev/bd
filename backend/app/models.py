@@ -270,6 +270,22 @@ class DietaUpdate(SQLModel):
     id_ref_tarde: Optional[int]
     id_ref_noite: Optional[int]
 
+class Plan(SQLModel):
+    plano_id: int
+    usuarios_id: int
+    user_name: str
+    sessao_duracao_minutos: int
+    sessao_data: Optional[datetime.datetime]
+    treinador_name: Optional[str] 
+    treinador_telefone: Optional[str] 
+    treinador_especialidade: Optional[str] 
+    avaliacao_peso: Optional[float] 
+    avaliacao_altura: Optional[float]
+    avaliacao_perc_gordura: Optional[float] 
+    avaliacao_shape_id: Optional[int] 
+    
+class viewPlano(SQLModel):
+    data: list[Plan]
 
 class DietaPublic(SQLModel):
     id: Optional[int]

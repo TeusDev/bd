@@ -84,6 +84,25 @@ async def get_fotos(
 
     return responses
 
+@router.get("/shapes/fotos_user")
+async def get_fotos_user(
+    session: SessionDep, 
+    current_user: CurrentUser,
+):
+    result = session.exec(select(Shape).where(Shape.usuario_id==current_user.id))
+  
+    shapes = result.all()  
+
+    if not shapes:
+        raise HTTPException(status_code=404, detail="No shapes or photos found")
+
+    fotos = [{"id": shape.id, "foto": io.BytesIO(shape.foto)} for shape in shapes if shape.foto]
+    if not fotos:
+        raise HTTPException(status_code=404, detail="No photos available")
+
+    responses = [{"foto_id": foto["id"]} for foto in fotos]
+
+    return responses
 
 @router.delete("/shapes/fotos/{shape_id}")
 async def delete_foto(

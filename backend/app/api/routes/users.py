@@ -108,8 +108,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    # statement = delete(Item).where(col(Item.owner_id) == current_user.id)
-    # session.exec(statement)  # type: ignore
+
     session.delete(current_user)
     session.commit()
     return Message(message="User deleted successfully")
@@ -119,7 +118,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 @router.post("/signup", response_model=UserPublic)
 def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
-    Motivos Didáticos - Mostrar novo superusuário
+    Motivos Didáticos - Mostrar novo usuário
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
@@ -147,7 +146,7 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
 @router.post("/signup_superuser", response_model=UserPublic)
 def register_superuser(session: SessionDep, user_in: UserRegister) -> Any:
     """
-    Motivos Didáticos - Mostrar novo usuário
+    Motivos Didáticos - Mostrar novo superusuário
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:

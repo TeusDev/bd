@@ -1,239 +1,151 @@
-# Full Stack FastAPI Template
+# README do Projeto de Banco de Dados Gym Fitness
 
-<a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
-<a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
+## Descrição
 
-## Technology Stack and Features
+Este projeto é um aplicativo de Gym Fitness desenvolvido usando FastAPI. O objetivo principal do sistema é gerenciar planos de treino e dieta de usuários, permitindo que treinadores personalizem rotinas e acompanhem o progresso dos seus alunos. O projeto conta com um banco de dados relacional que segue o diagrama entidade-relacionamento (MER) descrito abaixo, com várias entidades interligadas para armazenar informações de usuários, sessões de treino, avaliações, entre outros. Inspirado/Fork do template original do repositóro do fastapi.Veja o template completo do FastAPI em [FastAPI Full Stack Template](https://github.com/fastapi/full-stack-fastapi-template).
 
-- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-    - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
-    - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
-    - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
-- 🚀 [React](https://react.dev) for the frontend.
-    - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
-    - 🎨 [Chakra UI](https://chakra-ui.com) for the frontend components.
-    - 🤖 An automatically generated frontend client.
-    - 🧪 [Playwright](https://playwright.dev) for End-to-End testing.
-    - 🦇 Dark mode support.
-- 🐋 [Docker Compose](https://www.docker.com) for development and production.
-- 🔒 Secure password hashing by default.
-- 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email based password recovery.
-- ✅ Tests with [Pytest](https://pytest.org).
-- 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
-- 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+## Entidades Principais
 
-### Dashboard Login
+- **Plano**: Armazena informações sobre o plano de treino e dieta do usuário.
+- **Dieta**: Relacionada aos planos, define as diretrizes alimentares.
+- **Usuário**: Representa a pessoa que utiliza o sistema, podendo ter um ou mais planos e avaliações.
+- **Sessão**: Conjunto de treinos realizados em uma data específica.
+- **Treino**: Composto por exercícios que o usuário realiza em uma sessão.
+- **Exercício**: Detalha os exercícios realizados durante o treino.
+- **Avaliações**: Acompanha o progresso físico do usuário ao longo do tempo.
+- **Treinador**: Profissional que define planos e avalia o progresso do usuário.
+- **Shape**: Representação física do usuário com fotos para acompanhamento.
+- **Telefone**: Informações de contato dos treinadores.
+- **Refeição**: Parte da dieta, contém informações sobre os alimentos que o usuário deve consumir.
 
-[![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
-### Dashboard - Admin
+## Diagrama Entidade-Relacionamento (MER)
 
-[![API docs](img/dashboard.png)](https://github.com/fastapi/full-stack-fastapi-template)
+Abaixo está o diagrama entidade-relacionamento (MER) que representa as relações entre as principais entidades do sistema.
 
-### Dashboard - Create User
+![MER do Projeto Gym Fitness](./imagens/MER.png)
 
-[![API docs](img/dashboard-create.png)](https://github.com/fastapi/full-stack-fastapi-template)
+## Modelo Relacional (MR)
 
-### Dashboard - Items
+A seguir está o modelo relacional (MR) do sistema que detalha as tabelas do banco de dados e seus relacionamentos.
 
-[![API docs](img/dashboard-items.png)](https://github.com/fastapi/full-stack-fastapi-template)
+![Modelo Relacional (MR) do Projeto Gym Fitness](./imagens/MR.png)
 
-### Dashboard - User Settings
+## Tecnologias Utilizadas
 
-[![API docs](img/dashboard-user-settings.png)](https://github.com/fastapi/full-stack-fastapi-template)
+- **FastAPI:** Framework usado para a criação das APIs.
+- **SQLAlchemy:** ORM utilizado para gerenciar as entidades e seus relacionamentos no banco de dados.
+- **PostgreSQL:** Banco de dados relacional utilizado para armazenar as informações.
 
-### Dashboard - Dark Mode
+## Como Executar o Projeto
 
-[![API docs](img/dashboard-dark.png)](https://github.com/fastapi/full-stack-fastapi-template)
+**.** Testado em distribuições Linux (Ubuntu e Debian)
 
-### Interactive API Documentation
+**.** Para acessar o banco de dados internamente, usar dbeaver e as credenciais em .env
 
-[![API docs](img/docs.png)](https://github.com/fastapi/full-stack-fastapi-template)
+**Passo 1:** Instalar Docker e Docker Compose no sistema operacional  
+**Passo 2:** Executar o comando “docker compose up --build”  
+**Passo 3:** Abrir outra aba do terminal e executar o comando “docker compose exec backend bash”
+**Passo 4:** Executar as migrações no alembic, conforme readme na pasta backend
+**Passo 5:** Acessar o endereço “localhost/docs” em algum browser para vizualizar a interface fornecida pelo fastapi
 
-## How To Use It
 
-You can **just fork or clone** this repository and use it as is.
 
-✨ It just works. ✨
 
-### How to Use a Private Repository
+## Rotas da API
 
-If you want to have a private repository, GitHub won't allow you to simply fork it as it doesn't allow changing the visibility of forks.
+**Usuário**  
+GET /usuarios/: Lista todos os usuários.  
+POST /usuarios/: Cria um novo usuário.  
+PUT /usuarios/{id}: Atualiza um usuário.  
+DELETE /usuarios/{id}: Remove um usuário.
 
-But you can do the following:
+**Treinador**  
+GET /treinadores/: Lista todos os treinadores.  
+POST /treinadores/: Cria um novo treinador.  
+PUT /treinadores/{id}: Atualiza um treinador.  
+DELETE /treinadores/{id}: Remove um treinador.
 
-- Create a new GitHub repo, for example `my-full-stack`.
-- Clone this repository manually, set the name with the name of the project you want to use, for example `my-full-stack`:
+**Plano**  
+GET /planos/: Lista todos os planos.  
+POST /planos/: Cria um novo plano.  
+PUT /planos/{id}: Atualiza um plano.  
+DELETE /planos/{id}: Remove um plano.
 
-```bash
-git clone git@github.com:fastapi/full-stack-fastapi-template.git my-full-stack
-```
+**Sessão**  
+GET /sessoes/: Lista todas as sessões.  
+POST /sessoes/: Cria uma nova sessão.  
+PUT /sessoes/{id}: Atualiza uma sessão.  
+DELETE /sessoes/{id}: Remove uma sessão.
 
-- Enter into the new directory:
+**Treino**  
+GET /treinos/: Lista todos os treinos.  
+POST /treinos/: Cria um novo treino.  
+PUT /treinos/{id}: Atualiza um treino.  
+DELETE /treinos/{id}: Remove um treino.
 
-```bash
-cd my-full-stack
-```
 
-- Set the new origin to your new repository, copy it from the GitHub interface, for example:
+## Consultas ao Banco de Dados
+# Criação de viwes
+No contexto da criação de views para o projeto, as views são uma poderosa ferramenta no gerenciamento e organização dos dados, permitindo consultas pré-definidas que podem ser reutilizadas facilmente e de maneira eficiente. As seguintes views foram criadas para facilitar o acesso a informações específicas sobre exercícios:
 
-```bash
-git remote set-url origin git@github.com:octocat/my-full-stack.git
-```
+![Modelo Relacional (MR) do Projeto Gym Fitness](./imagens/views.png)
 
-- Add this repo as another "remote" to allow you to get updates later:
+View exercicios_com_pernas: Esta view foi criada para exibir todos os exercícios que estão relacionados ao grupo muscular "Pernas". Ela executa uma consulta na tabela exercicio e retorna apenas os registros em que o campo grupo_muscular contém a palavra "Pernas". A utilização da função ILIKE permite uma busca que não diferencia maiúsculas de minúsculas, tornando a pesquisa mais flexível. Essa view é útil quando o objetivo é visualizar rapidamente os exercícios focados no fortalecimento ou treino das pernas.
+View exercicios_cardio: Semelhante à view anterior, esta view foi criada para listar todos os exercícios relacionados ao grupo "Cardio". Ela facilita a consulta de exercícios que envolvem atividades cardiovasculares, extraindo as informações diretamente da tabela exercicio onde o grupo muscular contém a palavra "Cardio". Isso é particularmente útil em situações onde há a necessidade de separar os exercícios de resistência muscular dos aeróbicos para planejamento de treino.
 
-```bash
-git remote add upstream git@github.com:fastapi/full-stack-fastapi-template.git
-```
+# Procedures
+No contexto do sistema de banco de dados do aplicativo Gym Fitness, a criação de stored procedures (ou funções armazenadas) oferece diversos benefícios em termos de eficiência e organização do código SQL. As funções listadas abaixo demonstram como essas rotinas podem otimizar operações recorrentes e simplificar o acesso a dados complexos:
 
-- Push the code to your new repository:
+![Modelo Relacional (MR) do Projeto Gym Fitness](./imagens/procedures.png)
 
-```bash
-git push -u origin master
-```
-
-### Update From the Original Template
-
-After cloning the repository, and after doing changes, you might want to get the latest changes from this original template.
-
-- Make sure you added the original repository as a remote, you can check it with:
-
-```bash
-git remote -v
-
-origin    git@github.com:octocat/my-full-stack.git (fetch)
-origin    git@github.com:octocat/my-full-stack.git (push)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (fetch)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (push)
-```
-
-- Pull the latest changes without merging:
-
-```bash
-git pull --no-commit upstream master
-```
-
-This will download the latest changes from this template without committing them, that way you can check everything is right before committing.
-
-- If there are conflicts, solve them in your editor.
-
-- Once you are done, commit the changes:
-
-```bash
-git merge --continue
-```
-
-### Configure
-
-You can then update configs in the `.env` files to customize your configurations.
-
-Before deploying it, make sure you change at least the values for:
-
-- `SECRET_KEY`
-- `FIRST_SUPERUSER_PASSWORD`
-- `POSTGRES_PASSWORD`
-
-You can (and should) pass these as environment variables from secrets.
-
-Read the [deployment.md](./deployment.md) docs for more details.
-
-### Generate Secret Keys
-
-Some environment variables in the `.env` file have a default value of `changethis`.
-
-You have to change them with a secret key, to generate secret keys you can run the following command:
-
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-Copy the content and use that as password / secret key. And run that again to generate another secure key.
-
-## How To Use It - Alternative With Copier
-
-This repository also supports generating a new project using [Copier](https://copier.readthedocs.io).
-
-It will copy all the files, ask you configuration questions, and update the `.env` files with your answers.
-
-### Install Copier
-
-You can install Copier with:
-
-```bash
-pip install copier
-```
-
-Or better, if you have [`pipx`](https://pipx.pypa.io/), you can run it with:
-
-```bash
-pipx install copier
-```
-
-**Note**: If you have `pipx`, installing copier is optional, you could run it directly.
-
-### Generate a Project With Copier
-
-Decide a name for your new project's directory, you will use it below. For example, `my-awesome-project`.
-
-Go to the directory that will be the parent of your project, and run the command with your project's name:
-
-```bash
-copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
-```
-
-If you have `pipx` and you didn't install `copier`, you can run it directly:
-
-```bash
-pipx run copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
-```
-
-**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/fastapi/full-stack-fastapi-template/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
-
-### Input Variables
-
-Copier will ask you for some data, you might want to have at hand before generating the project.
-
-But don't worry, you can just update any of that in the `.env` files afterwards.
-
-The input variables, with their default values (some auto generated) are:
-
-- `project_name`: (default: `"FastAPI Project"`) The name of the project, shown to API users (in .env).
-- `stack_name`: (default: `"fastapi-project"`) The name of the stack used for Docker Compose labels and project name (no spaces, no periods) (in .env).
-- `secret_key`: (default: `"changethis"`) The secret key for the project, used for security, stored in .env, you can generate one with the method above.
-- `first_superuser`: (default: `"admin@example.com"`) The email of the first superuser (in .env).
-- `first_superuser_password`: (default: `"changethis"`) The password of the first superuser (in .env).
-- `smtp_host`: (default: "") The SMTP server host to send emails, you can set it later in .env.
-- `smtp_user`: (default: "") The SMTP server user to send emails, you can set it later in .env.
-- `smtp_password`: (default: "") The SMTP server password to send emails, you can set it later in .env.
-- `emails_from_email`: (default: `"info@example.com"`) The email account to send emails from, you can set it later in .env.
-- `postgres_password`: (default: `"changethis"`) The password for the PostgreSQL database, stored in .env, you can generate one with the method above.
-- `sentry_dsn`: (default: "") The DSN for Sentry, if you are using it, you can set it later in .env.
-
-## Backend Development
-
-Backend docs: [backend/README.md](./backend/README.md).
-
-## Frontend Development
-
-Frontend docs: [frontend/README.md](./frontend/README.md).
-
-## Deployment
-
-Deployment docs: [deployment.md](./deployment.md).
-
-## Development
-
-General development docs: [development.md](./development.md).
-
-This includes using Docker Compose, custom local domains, `.env` configurations, etc.
-
-## Release Notes
-
-Check the file [release-notes.md](./release-notes.md).
-
-## License
-
-The Full Stack FastAPI Template is licensed under the terms of the MIT license.
+Função get_dieta_by_min_calories:
+	Esta função retorna a dieta que contém a menor quantidade de calorias, de acordo com um limite fixo de 2000 calorias. Ela utiliza joins entre as refeições (manhã, tarde e noite) associadas a uma dieta e calcula o total de calorias dessas refeições. O uso dessa função é vantajoso em cenários onde o sistema precisa rapidamente identificar dietas que se enquadrem em uma determinada restrição calórica, tornando a consulta mais eficiente e reutilizável em diversas partes do sistema.
+Função get_total_calories:
+	Esta função calcula o total de calorias consumidas em uma sessão de treino, somando as calorias dos três treinos realizados nessa sessão. Ao utilizar joins para acessar os treinos associados à sessão, a função retorna o valor total de calorias, facilitando a criação de relatórios de consumo energético. A função é particularmente útil para monitoramento de desempenho dos usuários, já que evita a necessidade de escrever repetidamente a lógica de cálculo de calorias em diferentes consultas.
+
+# Comandos DDL
+No sistema de banco de dados do aplicativo Gym Fitness, os comandos DDL (Data Definition Language) desempenham um papel crucial na criação, modificação e exclusão de estruturas de dados como tabelas, índices e chaves primárias ou estrangeiras. Abaixo, descrevemos alguns dos comandos DDL utilizados e seus impactos no banco de dados:
+Criação de Tabelas:
+A criação de tabelas como dieta, exercício, seção, treinador e outras define a estrutura do banco de dados, especificando os atributos e seus tipos de dados. Cada tabela contém uma chave primária, garantindo a unicidade dos registros, e algumas tabelas possuem restrições de integridade referencial, como as chaves estrangeiras, que asseguram que os relacionamentos entre as tabelas sejam mantidos corretamente.
+Índices e Unicidade:
+Além da criação de tabelas, um índice único foi definido para o campo email da tabela user, garantindo que não haja duplicação de e-mails no sistema. Esse tipo de restrição é essencial para manter a integridade dos dados, evitando registros duplicados que possam comprometer o funcionamento do sistema.
+Relacionamentos e Integridade Referencial:
+Diversas tabelas, como dieta_refeicoes, treino_exercicio e plano, utilizam chaves estrangeiras para criar relacionamentos com outras tabelas. As restrições ON DELETE CASCADE asseguram que, ao remover um registro pai, seus registros filhos relacionados também sejam excluídos, garantindo a consistência dos dados e evitando a criação de registros órfãos.
+Atualizações de Versionamento com Alembic:
+Além da criação de tabelas, o banco de dados utiliza o sistema de migração Alembic para controlar a versão do esquema. O comando UPDATE alembic_version é usado para garantir que a versão do banco de dados esteja sincronizada com o código atual, permitindo atualizações estruturais de forma controlada e segura.
+Esses comandos DDL são fundamentais para estruturar o banco de dados do aplicativo, garantindo a integridade dos dados, mantendo relacionamentos adequados e permitindo que o sistema evolua de maneira controlada com migrações e versões bem definidas.
+
+
+![Modelo Relacional (MR) do Projeto Gym Fitness](./imagens/ddl.png)
+
+
+## Avaliação das Formas Normais
+**1 – Tabela “Treinador”:**
+A tabela atende os critérios da primeira forma normal, visto que todos seus atributos são atômicos e monovalorados. Deve-se perceber que a entidade aceita apenas um “telefone”, não sendo um atributo multivalorado.
+A tabela se encontra da segunda forma normal, visto que além de estar na 1FN, todos seus campos (“Nome”, “Especialidade”, “Telefone”) dependem da totalidade da chave (“id”)
+A tabela encontra-se na terceira forma normal. Além de estar na 2FN, nenhum atributo é definido por outro atributo que não seja a chave primária. Deve-se notar que “nome” não é capaz de definir os demais atributos uma vez que é possível a existência de homônimos no banco de dados
+ 
+**2 – Tabela “Avaliacoes”**
+A tabela está na primeira forma normal, onde todos os atributos são atômicos e monovalorados. Nota-se que “shape”, apesar de complementar as avaliações, foi feito como uma tabela separada, para que o usuário possa colocar mais uma foto e acompanhar sua evolução com mais precisão
+A tabela se encontra da segunda forma normal, visto que além de estar na 1FN, todos seus campos (“percentual_gordura”, “altura”, “peso”, “data”) dependem da totalidade da chave (“id”)
+A tabela está na terceira forma. Além de estar na 2FN, nenhum atributo não chave capaz de definir outro atributo. Todos dependem de “id” apenas.
+ 
+**3 – Tabela “Sessao”**
+A entidade "sessao" contém atributos atômicos, como "Duração minutos" e "Data", que não possuem valores compostos ou multivalorados. Portanto, a 1FN está satisfeita.
+A entidade tem uma chave primária composta ou uma chave simples (depende da modelagem completa). Todos os atributos dependem completamente da chave “id”. Não há dependências parciais, o que satisfaz a 2FN.
+Não existem dependências funcionais transitivas aparentes, já que todos os atributos, como "Duração minutos" e "Data", estão diretamente relacionados à chave primária "id". Assim, a 3FN é atendida
+ 
+ 
+**4 – Tabela “Treino”**
+A entidade "treino" contém atributos atômicos, como "Calorias" e "id". Não há atributos multivalorados ou compostos, portanto, a entidade está na 1FN.
+A chave primária é "id", e todos os outros atributos, como "Calorias", dependem completamente dessa chave. Portanto, não há dependências parciais, o que garante que a entidade esteja na 2FN.
+Não há dependências transitivas visíveis. Todos os atributos não-chave estão diretamente relacionados à chave primária "id", sem depender uns dos outros. Assim, a entidade também está na 3FN.
+
+
+
+ 
+**5 – Tabela “Exercício”**
+A tabela "exercicio" contém atributos como "id", "nome" e "Grupo Muscular". Todos esses atributos são atômicos, ou seja, cada campo contém apenas um valor indivisível. Não há presença de grupos repetidos ou listas de valores em um único campo, o que satisfaz a 1ª Forma Normal.
+A chave primária é o atributo "id". Todos os atributos da entidade "exercicio", como "nome" e "Grupo Muscular", dependem diretamente da chave primária "id" e não há dependência parcial de uma chave composta. Portanto, a entidade cumpre a 2ª Forma Normal, já que não existem dependências funcionais parciais.
+A tabela também parece atender à 3ª Forma Normal, pois não existem dependências funcionais transitivas. Isso significa que todos os atributos não-chave ("nome" e "Grupo Muscular") estão diretamente relacionados à chave primária "id" e não dependem de outros atributos não-chave. Dessa forma, a 3FN também é satisfeita.

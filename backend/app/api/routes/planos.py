@@ -273,7 +273,7 @@ def get_max_calorias_sessao(session: SessionDep) -> Any:
 
 @router.post("/planos_create_user", response_model=PlanoPublic)
 def create_planos_user(
-    *, session: SessionDep, current_user: CurrentUser, id_avaliacao:int,especialidade:str,grupo_muscular:str
+    *, session: SessionDep, current_user: CurrentUser, id_avaliacao:int,especialidade:str
 ) -> Any:
     """
     Create new plano.

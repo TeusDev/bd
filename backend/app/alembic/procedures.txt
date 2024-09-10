@@ -35,3 +35,4 @@ CREATE OR REPLACE FUNCTION get_total_calories(p_id_sessao INTEGER)  -- Renamed p
             RETURN total_calories;
         END;
         $$ LANGUAGE plpgsql;
+

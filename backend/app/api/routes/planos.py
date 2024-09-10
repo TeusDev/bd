@@ -34,7 +34,7 @@ from app.models import (
 )
 
 router = APIRouter()
-@router.get("/viewplanos",response_model=viewPlano,dependencies=[Depends(get_current_active_superuser)])
+@router.get("/viewplanos",response_model=viewPlano)
 def view_planos (current_user: CurrentUser,session: SessionDep, skip: int = 0, limit: int = 100
 ) -> Any:
     
@@ -122,9 +122,9 @@ def view_planos (current_user: CurrentUser,session: SessionDep, skip: int = 0, l
         LEFT JOIN 
             treinador ON treinador.id = plano.id_treinador
         LEFT JOIN 
+                    avaliacao ON plano.id_avaliacao = avaliacao.id
         WHERE 
         usuarios.id = :id_user
-            avaliacao ON plano.id_avaliacao = avaliacao.id
         LIMIT :limit OFFSET :skip
     """)  
         
@@ -158,7 +158,6 @@ def view_planos (current_user: CurrentUser,session: SessionDep, skip: int = 0, l
             
     return viewPlano(data=planos)
     
-
 
 @router.get("/",response_model=PlanosPublic)
 def read_planos (current_user: CurrentUser,session: SessionDep, skip: int = 0, limit: int = 100

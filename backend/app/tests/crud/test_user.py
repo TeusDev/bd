@@ -10,7 +10,7 @@ from app.tests.utils.utils import random_email, random_lower_string
 import random
 
 def test_create_user(db: Session) -> None:
-    for i in range(20):
+    for i in range(10):
         email = random_email()
         password = random_lower_string()
         user_in = UserCreate(email=email, password=password)

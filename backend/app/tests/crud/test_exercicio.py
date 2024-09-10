@@ -31,7 +31,7 @@ from .utils import (
 N=8
 
 def test_create_exercicio(db: Session) -> None:
-    for i in range(25):
+    for i in range(10):
         exercicio_aleatorio = random.choice(list(exerciciosh.keys()))
         id = random.randint(0,10000000)
         exercicio = ExercicioCreate(

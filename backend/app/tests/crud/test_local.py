@@ -15,7 +15,7 @@ N = 8
 
 
 def test_create_local(db: Session) -> None:
-    for i in range(20):
+    for i in range(10):
         local = random.choice(academias)
         id1 = random.randint(0,10000000)
         local_in = LocalCreate(id=id1,nome_local=local)

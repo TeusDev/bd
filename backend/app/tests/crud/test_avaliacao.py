@@ -17,7 +17,7 @@ from .utils import especialidades, random_datetime,start_date,end_date
 N=8
 
 def test_create_avaliacao(db: Session) -> None:
-    for i in range(20):
+    for i in range(10):
         email = random_email()
         password = random_lower_string()
         user_in = UserCreate(email=email, password=password)

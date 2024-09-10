@@ -56,7 +56,7 @@ async def create_upload_file(
 async def get_foto(current_user:CurrentUser,session: SessionDep, id: int):
     result = session.execute(select(Shape).where(Shape.id == id))
     shape = result.scalars().first()
-    if result.id != current_user.id:
+    if shape.id != current_user.id:
         raise HTTPException(status_code=404, detail="You can't see another person shape!")
     
     if not shape or not shape.foto:
@@ -83,33 +83,10 @@ async def get_fotos(
     if not fotos:
         raise HTTPException(status_code=404, detail="No photos available")
 
-    responses = [{"id": foto["id"]} for foto in fotos]
+    responses = [{"foto_id": foto["id"]} for foto in fotos]
 
     return responses
 
-@router.get("/shapes/fotos/{user_id}")
-async def get_fotos_by_user(
-    user_id: int,
-    session: SessionDep, 
-    current_user: CurrentUser
-):
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Operation not permitted")
-
-    result = session.execute(select(Shape).where(Shape.usuario_id == user_id))
-    
-    shapes = result.scalars().all()
-
-    if not shapes:
-        raise HTTPException(status_code=404, detail="No shapes or photos found for the specified user")
-
-    fotos = [{"id": shape.id, "foto": io.BytesIO(shape.foto)} for shape in shapes if shape.foto]
-    if not fotos:
-        raise HTTPException(status_code=404, detail="No photos available for the specified user")
-
-    responses = [{"id": foto["id"], "foto": StreamingResponse(foto["foto"], media_type="image/png")} for foto in fotos]
-
-    return responses
 
 @router.delete("/shapes/fotos/{shape_id}")
 async def delete_foto(

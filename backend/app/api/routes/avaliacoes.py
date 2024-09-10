@@ -23,8 +23,6 @@ from app.models import (
 
 router = APIRouter()
 
-@router.get("/me", response_model=AvaliacoesPublic)
-
 
 @router.get("/by_id/{avaliacao_id}", response_model=AvaliacaoPublic)
 def read_avaliacao_by_id(

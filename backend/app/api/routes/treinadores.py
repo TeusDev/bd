@@ -106,10 +106,13 @@ def read_treinadores_especialidade(session: SessionDep, especialidade:str,skip: 
 
     count_statement = select(func.count()).select_from(Treinador).where(Treinador.especialidade == especialidade)
     count = session.exec(count_statement).one()
-
+    
     statement = select(Treinador).where(Treinador.especialidade == especialidade).offset(skip).limit(limit)
     treinadores = session.exec(statement).all()
-
+    if not treinadores:
+        raise HTTPException(
+                status_code=404,
+                detail="The treinador with this especialidade has not been found")
     return TreinadoresPublic(data=treinadores, count=count)
 
 

@@ -24,20 +24,21 @@ class TreinadorBase(SQLModel):
 
 # Properties to receive via API on update, all are optional
 class TreinadorUpdate(TreinadorBase):
+    id: str | None = Field(default=None, max_length=11)  # Agora inclui o campo id
     telefone: str | None = Field(max_length=8,default=None,unique=True)
     especialidade: str | None = Field(default=None, min_length=8, max_length=40)
 
     
 class Treinador(TreinadorBase, table=True):
     id: str = Field(default=None, primary_key=True,max_length=11)
-
+    
 class TreinadorPublic(SQLModel):
     id: Optional[str]
     name: Optional[str] 
     telefone: Optional[str]
     especialidade: Optional[str]
     telefone: Optional[str]
-    local_de_treino: Optional[str]
+    local_de_treino: Optional[str] = None
 class TreinadoresPublic(SQLModel):
     data: list[TreinadorPublic]
     count: int

@@ -1,0 +1,37 @@
+CREATE OR REPLACE FUNCTION get_dieta_by_min_calories()
+RETURNS TABLE(id_dieta INT) AS $$
+DECLARE
+    calorias_limit NUMERIC;  -- Renomeie para evitar ambiguidade
+BEGIN
+    calorias_limit := 2000;  -- Exemplo de valor fixo para o limite de calorias
+
+    RETURN QUERY
+ SELECT dr.id_dieta
+FROM dieta_refeicoes dr
+JOIN refeicao r_manha ON dr.id_ref_manha = r_manha.id
+JOIN refeicao r_tarde ON dr.id_ref_tarde = r_tarde.id
+JOIN refeicao r_noite ON dr.id_ref_noite = r_noite.id
+GROUP BY dr.id_dieta
+HAVING SUM(r_manha.calorias + r_tarde.calorias + r_noite.calorias) <= SUM(calorias_limit)
+ORDER BY SUM(r_manha.calorias + r_tarde.calorias + r_noite.calorias) ASC
+LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION get_total_calories(p_id_sessao INTEGER)  -- Renamed parameter
+        RETURNS INTEGER AS $$
+        DECLARE
+            total_calories INTEGER;
+        BEGIN
+            SELECT COALESCE(t1.calorias, 0) + COALESCE(t2.calorias, 0) + COALESCE(t3.calorias, 0)
+            INTO total_calories
+            FROM treino_sessao ts
+            JOIN treino t1 ON ts.id_treino1 = t1.id
+            JOIN treino t2 ON ts.id_treino2 = t2.id
+            JOIN treino t3 ON ts.id_treino3 = t3.id
+            WHERE ts.id_sessao = p_id_sessao;  -- Use the renamed parameter here
+
+            RETURN total_calories;
+        END;
+        $$ LANGUAGE plpgsql;

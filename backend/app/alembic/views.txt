@@ -1,0 +1,9 @@
+ CREATE OR REPLACE VIEW exercicios_com_pernas AS
+        SELECT exercicio, grupo_muscular,id
+        FROM exercicio
+        WHERE grupo_muscular ILIKE '%Pernas%';  
+
+CREATE OR REPLACE VIEW exercicios_cardio AS
+        SELECT exercicio, grupo_muscular,id
+        FROM exercicio
+        WHERE grupo_muscular ILIKE '%Cardio%'; 

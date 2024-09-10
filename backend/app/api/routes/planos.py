@@ -251,7 +251,7 @@ $$ LANGUAGE plpgsql;
     session.refresh(plano)
     return plano
 
-@router.put("/planos/{plano_id}", response_model=PlanoPublic)
+@router.put("/planos/{plano_id}", response_model=Message)
 def update_plano(
     session: SessionDep,
     current_user: CurrentUser,
@@ -279,12 +279,12 @@ def update_plano(
     )
     
     for key, value in plano_in.dict(exclude_unset=True).items():
-        setattr(plano, key, value)
+        setattr(planoz, key, value)
 
     session.commit()
-    session.refresh(plano)
+    session.refresh(planoz)
 
-    return PlanoPublic.from_orm(plano)
+    return Message(message="plano updated successfully")
 
 def get_dieta_by_min_calorias(session: SessionDep):
     procedure_call = text("""

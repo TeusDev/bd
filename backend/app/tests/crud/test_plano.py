@@ -334,7 +334,8 @@ def test_create_plano(db: Session) -> None:
             id_user=iduser,
             id_sessao_treino=idsessao,
             id_treinador=treinador_id,
-            id_avaliacao=idav
+            id_avaliacao=idav,
+            id_dieta=iddieta
         )
         
         db.add(plano)

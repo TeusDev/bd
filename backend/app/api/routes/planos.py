@@ -153,6 +153,15 @@ def update_plano(
     if not plano:
         raise HTTPException(status_code=404, detail="Plano not found")
     
+    
+    planoz = Plano(
+        id=plano_id,
+        id_user=current_user.id,
+        id_sessao_treino=plano_in.id_sessao_treino,
+        id_treinador=plano_in.id_treinador,
+        id_avaliacao=plano_in.id_avaliacao
+    )
+    
     for key, value in plano_in.dict(exclude_unset=True).items():
         setattr(plano, key, value)
 
@@ -176,19 +185,24 @@ def get_dieta_by_min_calorias(session: SessionDep):
 
     return result[0]  # Retorna o id_dieta
 
-@router.delete("/{id}")
+@router.delete("/{id}", dependencies=[Depends(get_current_active_superuser)])
 def delete_plano(
-    *,session: SessionDep, id: int,current_user:CurrentUser
+    *, session: SessionDep, id: int, current_user: CurrentUser
 ) -> Message:
     """
-    Delete uma plano.
+    Delete a plano.
     """
-    plano = session.get(Plano, id)
-    if plano.id_user != current_user.id:
-        raise HTTPException(status_code=404, detail="Cant edit a plano that is not yours")
     
-    if not plano:
+    plano = session.execute(select(Plano).where(Plano.id == id)).scalars().first()
+    
+    if plano is None:
         raise HTTPException(status_code=404, detail="Plano not found")
+    
+    if plano.id_user != current_user.id:
+        raise HTTPException(status_code=403, detail="Cannot delete a plano that is not yours")
+    
+    # Perform the delete operation
     session.delete(plano)
     session.commit()
+    
     return Message(message="Plano deleted successfully")

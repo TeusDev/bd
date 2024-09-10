@@ -296,7 +296,7 @@ class PlanoCreate(PlanoBase):
 
 
 
-class PlanoUpdate(PlanoBase):
+class PlanoUpdate(SQLModel):
     id_dieta: int | None = Field(default_factory=None)
     id_sessao_treino: int | None = Field(default_factory=None)
     id_treinador: str | None = Field(default_factory=None)
@@ -306,7 +306,8 @@ class Plano(PlanoBase, table=True):
     id_dieta: int | None = Field(default_factory=None,foreign_key="dieta.id", ondelete="CASCADE")
 
 class PlanoPublic(PlanoBase):
-    pass
+    id_dieta: Optional[int] 
+
 
 class PlanosPublic(SQLModel):
     data: list[PlanoPublic]

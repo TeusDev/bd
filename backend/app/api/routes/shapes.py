@@ -69,12 +69,9 @@ async def get_fotos(
     session: SessionDep, 
     current_user: CurrentUser
 ):
-    if current_user.is_superuser:
-        result = session.execute(select(Shape))
-    else:
-        result = session.execute(select(Shape).where(Shape.usuario_id == current_user.id))
-    
-    shapes = result.scalars().all()
+    result = session.exec(select(Shape))
+  
+    shapes = result.all()  # Directly access all results
 
     if not shapes:
         raise HTTPException(status_code=404, detail="No shapes or photos found")

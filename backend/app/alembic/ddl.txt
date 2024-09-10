@@ -1,5 +1,9 @@
-INFO  [alembic.runtime.migration] Running upgrade 1c7ced18cb52 -> 7d98100f1302, ddl
--- Running upgrade 1c7ced18cb52 -> 7d98100f1302
+
+
+UPDATE alembic_version SET version_num='b010ad5af822' WHERE alembic_version.version_num = '1a31ce608336';
+
+INFO  [alembic.runtime.migration] Running upgrade b010ad5af822 -> a3317942a44e, final
+-- Running upgrade b010ad5af822 -> a3317942a44e
 
 CREATE TABLE dieta (
     id SERIAL NOT NULL, 
@@ -33,13 +37,6 @@ CREATE TABLE sessao (
     PRIMARY KEY (id)
 );
 
-CREATE TABLE shape (
-    nome_foto VARCHAR NOT NULL, 
-    id SERIAL NOT NULL, 
-    foto BYTEA, 
-    PRIMARY KEY (id)
-);
-
 CREATE TABLE treinador (
     telefone VARCHAR(11), 
     name VARCHAR(255), 
@@ -55,16 +52,17 @@ CREATE TABLE treino (
     PRIMARY KEY (id)
 );
 
-CREATE TABLE avaliacao (
-    data_avaliacao TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
-    peso FLOAT NOT NULL, 
-    altura FLOAT NOT NULL, 
-    perc_gordura FLOAT NOT NULL, 
-    shape_id INTEGER, 
+CREATE TABLE "user" (
+    email VARCHAR(255) NOT NULL, 
+    is_active BOOLEAN NOT NULL, 
+    is_superuser BOOLEAN NOT NULL, 
+    name VARCHAR(255), 
     id SERIAL NOT NULL, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(shape_id) REFERENCES shape (id)
+    hashed_password VARCHAR NOT NULL, 
+    PRIMARY KEY (id)
 );
+
+CREATE UNIQUE INDEX ix_user_email ON "user" (email);
 
 CREATE TABLE dieta_refeicoes (
     id_dieta INTEGER NOT NULL, 
@@ -72,26 +70,35 @@ CREATE TABLE dieta_refeicoes (
     id_ref_tarde INTEGER NOT NULL, 
     id_ref_noite INTEGER NOT NULL, 
     PRIMARY KEY (id_dieta, id_ref_manha, id_ref_tarde, id_ref_noite), 
-    FOREIGN KEY(id_dieta) REFERENCES dieta (id), 
-    FOREIGN KEY(id_ref_manha) REFERENCES refeicao (id), 
-    FOREIGN KEY(id_ref_noite) REFERENCES refeicao (id), 
-    FOREIGN KEY(id_ref_tarde) REFERENCES refeicao (id)
+    FOREIGN KEY(id_dieta) REFERENCES dieta (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_ref_manha) REFERENCES refeicao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_ref_noite) REFERENCES refeicao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_ref_tarde) REFERENCES refeicao (id) ON DELETE CASCADE
+);
+
+CREATE TABLE shape (
+    nome_foto VARCHAR NOT NULL, 
+    usuario_id INTEGER, 
+    id SERIAL NOT NULL, 
+    foto BYTEA, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(usuario_id) REFERENCES "user" (id) ON DELETE CASCADE
 );
 
 CREATE TABLE treinador_locais (
     treinador_id VARCHAR(11) NOT NULL, 
     local_id INTEGER NOT NULL, 
     PRIMARY KEY (treinador_id, local_id), 
-    FOREIGN KEY(local_id) REFERENCES local (id), 
-    FOREIGN KEY(treinador_id) REFERENCES treinador (id)
+    FOREIGN KEY(local_id) REFERENCES local (id) ON DELETE CASCADE, 
+    FOREIGN KEY(treinador_id) REFERENCES treinador (id) ON DELETE CASCADE
 );
 
 CREATE TABLE treino_exercicio (
     id_treino INTEGER NOT NULL, 
     id_exercicio INTEGER NOT NULL, 
     PRIMARY KEY (id_treino, id_exercicio), 
-    FOREIGN KEY(id_exercicio) REFERENCES exercicio (id), 
-    FOREIGN KEY(id_treino) REFERENCES treino (id)
+    FOREIGN KEY(id_exercicio) REFERENCES exercicio (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treino) REFERENCES treino (id) ON DELETE CASCADE
 );
 
 CREATE TABLE treino_sessao (
@@ -100,25 +107,38 @@ CREATE TABLE treino_sessao (
     id_treino3 INTEGER NOT NULL, 
     id_sessao INTEGER NOT NULL, 
     PRIMARY KEY (id_treino1, id_treino2, id_treino3, id_sessao), 
-    FOREIGN KEY(id_sessao) REFERENCES sessao (id), 
-    FOREIGN KEY(id_treino1) REFERENCES treino (id), 
-    FOREIGN KEY(id_treino2) REFERENCES treino (id), 
-    FOREIGN KEY(id_treino3) REFERENCES treino (id)
+    FOREIGN KEY(id_sessao) REFERENCES sessao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treino1) REFERENCES treino (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treino2) REFERENCES treino (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treino3) REFERENCES treino (id) ON DELETE CASCADE
+);
+
+CREATE TABLE avaliacao (
+    data_avaliacao TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+    peso FLOAT NOT NULL, 
+    altura FLOAT NOT NULL, 
+    perc_gordura FLOAT NOT NULL, 
+    shape_id INTEGER, 
+    id SERIAL NOT NULL, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(shape_id) REFERENCES shape (id) ON DELETE CASCADE
 );
 
 CREATE TABLE plano (
     id INTEGER NOT NULL, 
-    id_user UUID NOT NULL, 
+    id_user INTEGER NOT NULL, 
     id_sessao_treino INTEGER, 
     id_treinador VARCHAR, 
     id_avaliacao INTEGER, 
+    id_dieta INTEGER, 
     PRIMARY KEY (id, id_user), 
-    FOREIGN KEY(id_avaliacao) REFERENCES avaliacao (id), 
-    FOREIGN KEY(id_sessao_treino) REFERENCES sessao (id), 
-    FOREIGN KEY(id_treinador) REFERENCES treinador (id), 
-    FOREIGN KEY(id_user) REFERENCES "user" (id)
+    FOREIGN KEY(id_avaliacao) REFERENCES avaliacao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_dieta) REFERENCES dieta (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_sessao_treino) REFERENCES sessao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treinador) REFERENCES treinador (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_user) REFERENCES "user" (id) ON DELETE CASCADE
 );
 
-UPDATE alembic_version SET version_num='7d98100f1302' WHERE alembic_version.version_num = '1c7ced18cb52';
+UPDATE alembic_version SET version_num='a3317942a44e' WHERE alembic_version.version_num = 'b010ad5af822';
 
 COMMIT;

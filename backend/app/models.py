@@ -1,4 +1,3 @@
-import uuid
 from decimal import Decimal
 from pydantic import EmailStr,BaseModel
 from sqlmodel import Field, Relationship, SQLModel,Session,create_engine,select
@@ -288,7 +287,7 @@ class PlanoBase(SQLModel):
     id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id", ondelete="CASCADE")
     id_treinador: str | None = Field(default_factory=None,foreign_key="treinador.id", ondelete="CASCADE")
     id_avaliacao : int | None = Field(default_factory = None,foreign_key="avaliacao.id", ondelete="CASCADE")
-
+    
 class PlanoCreate(PlanoBase):
     # id_user: int = Field(default_factory=None, foreign_key="user.id")
     id_sessao_treino: int | None = Field(default_factory=None,foreign_key="sessao.id", ondelete="CASCADE")

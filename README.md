@@ -116,9 +116,154 @@ Atualizações de Versionamento com Alembic:
 Além da criação de tabelas, o banco de dados utiliza o sistema de migração Alembic para controlar a versão do esquema. O comando UPDATE alembic_version é usado para garantir que a versão do banco de dados esteja sincronizada com o código atual, permitindo atualizações estruturais de forma controlada e segura.
 Esses comandos DDL são fundamentais para estruturar o banco de dados do aplicativo, garantindo a integridade dos dados, mantendo relacionamentos adequados e permitindo que o sistema evolua de maneira controlada com migrações e versões bem definidas.
 
+```sql
+UPDATE alembic_version SET version_num='b010ad5af822' WHERE alembic_version.version_num = '1a31ce608336';
 
-![Modelo Relacional (MR) do Projeto Gym Fitness](./imagens/ddl.png)
+INFO  [alembic.runtime.migration] Running upgrade b010ad5af822 -> a3317942a44e, final
+-- Running upgrade b010ad5af822 -> a3317942a44e
 
+Table Creation
+The following SQL commands create the necessary tables for the application:
+sql
+CREATE TABLE dieta (
+    id SERIAL NOT NULL, 
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE exercicio (
+    exercicio VARCHAR NOT NULL, 
+    grupo_muscular VARCHAR, 
+    id SERIAL NOT NULL, 
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE local (
+    nome_local VARCHAR(255) NOT NULL, 
+    id SERIAL NOT NULL, 
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE refeicao (
+    name VARCHAR(255) NOT NULL, 
+    calorias INTEGER NOT NULL, 
+    id SERIAL NOT NULL, 
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE sessao (
+    data TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+    duracao_minutos INTEGER NOT NULL, 
+    id SERIAL NOT NULL, 
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE treinador (
+    telefone VARCHAR(11), 
+    name VARCHAR(255), 
+    especialidade VARCHAR(255), 
+    id VARCHAR(11) NOT NULL, 
+    PRIMARY KEY (id), 
+    UNIQUE (telefone)
+);
+
+CREATE TABLE treino (
+    calorias INTEGER NOT NULL, 
+    id SERIAL NOT NULL, 
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE "user" (
+    email VARCHAR(255) NOT NULL, 
+    is_active BOOLEAN NOT NULL, 
+    is_superuser BOOLEAN NOT NULL, 
+    name VARCHAR(255), 
+    id SERIAL NOT NULL, 
+    hashed_password VARCHAR NOT NULL, 
+    PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX ix_user_email ON "user" (email);
+
+CREATE TABLE dieta_refeicoes (
+    id_dieta INTEGER NOT NULL, 
+    id_ref_manha INTEGER NOT NULL, 
+    id_ref_tarde INTEGER NOT NULL, 
+    id_ref_noite INTEGER NOT NULL, 
+    PRIMARY KEY (id_dieta, id_ref_manha, id_ref_tarde, id_ref_noite), 
+    FOREIGN KEY(id_dieta) REFERENCES dieta (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_ref_manha) REFERENCES refeicao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_ref_noite) REFERENCES refeicao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_ref_tarde) REFERENCES refeicao (id) ON DELETE CASCADE
+);
+
+CREATE TABLE shape (
+    nome_foto VARCHAR NOT NULL, 
+    usuario_id INTEGER, 
+    id SERIAL NOT NULL, 
+    foto BYTEA, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(usuario_id) REFERENCES "user" (id) ON DELETE CASCADE
+);
+
+CREATE TABLE treinador_locais (
+    treinador_id VARCHAR(11) NOT NULL, 
+    local_id INTEGER NOT NULL, 
+    PRIMARY KEY (treinador_id, local_id), 
+    FOREIGN KEY(local_id) REFERENCES local (id) ON DELETE CASCADE, 
+    FOREIGN KEY(treinador_id) REFERENCES treinador (id) ON DELETE CASCADE
+);
+
+CREATE TABLE treino_exercicio (
+    id_treino INTEGER NOT NULL, 
+    id_exercicio INTEGER NOT NULL, 
+    PRIMARY KEY (id_treino, id_exercicio), 
+    FOREIGN KEY(id_exercicio) REFERENCES exercicio (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treino) REFERENCES treino (id) ON DELETE CASCADE
+);
+
+CREATE TABLE treino_sessao (
+    id_treino1 INTEGER NOT NULL, 
+    id_treino2 INTEGER NOT NULL, 
+    id_treino3 INTEGER NOT NULL, 
+    id_sessao INTEGER NOT NULL, 
+    PRIMARY KEY (id_treino1, id_treino2, id_treino3, id_sessao), 
+    FOREIGN KEY(id_sessao) REFERENCES sessao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treino1) REFERENCES treino (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treino2) REFERENCES treino (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treino3) REFERENCES treino (id) ON DELETE CASCADE
+);
+
+CREATE TABLE avaliacao (
+    data_avaliacao TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
+    peso FLOAT NOT NULL, 
+    altura FLOAT NOT NULL, 
+    perc_gordura FLOAT NOT NULL, 
+    shape_id INTEGER, 
+    id SERIAL NOT NULL, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(shape_id) REFERENCES shape (id) ON DELETE CASCADE
+);
+
+CREATE TABLE plano (
+    id INTEGER NOT NULL, 
+    id_user INTEGER NOT NULL, 
+    id_sessao_treino INTEGER, 
+    id_treinador VARCHAR, 
+    id_avaliacao INTEGER, 
+    id_dieta INTEGER, 
+    PRIMARY KEY (id, id_user), 
+    FOREIGN KEY(id_avaliacao) REFERENCES avaliacao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_dieta) REFERENCES dieta (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_sessao_treino) REFERENCES sessao (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_treinador) REFERENCES treinador (id) ON DELETE CASCADE, 
+    FOREIGN KEY(id_user) REFERENCES "user" (id) ON DELETE CASCADE
+);
+
+
+
+UPDATE alembic_version SET version_num='a3317942a44e' WHERE alembic_version.version_num = 'b010ad5af822';
+COMMIT;
+```
 
 ## Avaliação das Formas Normais
 **1 – Tabela “Treinador”:**

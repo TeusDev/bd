@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from sqlmodel import col, delete, func, select,text
 import re
 from app import crud
 from app.api.deps import (
@@ -78,6 +78,44 @@ def create_local(*, session: SessionDep, local_in: LocalCreate) -> Any:
     session.commit()
     session.refresh(db_obj)
     return db_obj
+
+
+@router.put(
+        "/{local_id}",
+        response_model=Message,  dependencies=[Depends(get_current_active_superuser)]
+)
+def update_dieta(*, session: SessionDep, local_id: int, nome_novo:str) -> Any:
+    """
+    Update a dieta by ID.
+    """
+    # Fetch the existing dieta record
+    stm = select(Local).where(Local.id==local_id)
+    loc = session.exec(stm).first()
+    if not loc:
+        raise HTTPException(
+            status_code=404,
+            detail="Local not found.",
+        )
+
+    # Update dieta_refeicoes with new values
+    sql_query = text("""
+    UPDATE local
+    SET 
+        nome_local = :nome
+    WHERE 
+        local.id = :local_id;
+    """)
+    session.execute(
+        sql_query,
+        {
+            "nome": nome_novo,
+            "local_id": local_id
+        }
+    )
+    session.commit()  # Commit the update
+
+    return Message(message="Updated successfully")
+
 
 @router.delete("/{local}",  dependencies=[Depends(get_current_active_superuser)])
 def delete_local(

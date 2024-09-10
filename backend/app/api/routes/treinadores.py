@@ -81,10 +81,10 @@ def read_treinadores(session: SessionDep, skip: int = 0, limit: int = 100) -> An
 
 
 @router.get(
-    "/telefone",
+    "/id",
     response_model=TreinadorPublic
 )
-def read_treinadores_tel(session: SessionDep, id:str) -> Any:
+def read_treinadores_id(session: SessionDep, id:str) -> Any:
     """
     Retrieve treinadores by id.
     """
@@ -226,7 +226,7 @@ def delete_treinadores(
 
 
 @router.put(
-    "/{telefone}", 
+    "/{id}", 
     response_model=TreinadorPublic,    dependencies=[Depends(get_current_active_superuser)]
     )
 def update_treinadores(

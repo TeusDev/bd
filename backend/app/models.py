@@ -287,6 +287,7 @@ class Plan(SQLModel):
 class viewPlano(SQLModel):
     data: list[Plan]
 
+
 class DietaPublic(SQLModel):
     id: Optional[int]
     nome_ref_manha: Optional[str]

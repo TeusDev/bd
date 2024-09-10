@@ -71,6 +71,44 @@ def read_treinos(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     return TreinosPublic(data=treinos, count=count)
 
 
+
+@router.put(
+        "/{local_id}",
+        response_model=Message,  dependencies=[Depends(get_current_active_superuser)]
+)
+def update_treino(*, session: SessionDep, treino_id:int,calorias: int) -> Any:
+    """
+    Update a dieta by ID.
+    """
+    # Fetch the existing dieta record
+    stm = select(Treino).where(Treino.id==treino_id)
+    tr = session.exec(stm).first()
+    if not tr:
+        raise HTTPException(
+            status_code=404,
+            detail="Treino not found.",
+        )
+
+    # Update dieta_refeicoes with new values
+    sql_query = text("""
+    UPDATE treino
+    SET 
+        calorias = :cal
+    WHERE 
+        treino.id = :treino_id;
+    """)
+    session.execute(
+        sql_query,
+        {
+            "calorias": calorias,
+            "treino_id": treino_id
+        }
+    )
+    session.commit()  # Commit the update
+
+    return Message(message="Updated successfully")
+
+
 @router.post(
     "/",response_model=TreinoPublic,    dependencies=[Depends(get_current_active_superuser)]
 )

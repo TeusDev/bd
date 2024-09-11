@@ -97,8 +97,55 @@ View exercicios_cardio: Semelhante à view anterior, esta view foi criada para l
 # Procedures
 No contexto do sistema de banco de dados do aplicativo Gym Fitness, a criação de stored procedures (ou funções armazenadas) oferece diversos benefícios em termos de eficiência e organização do código SQL. As funções listadas abaixo demonstram como essas rotinas podem otimizar operações recorrentes e simplificar o acesso a dados complexos:
 
-![Modelo Relacional (MR) do Projeto Gym Fitness](./imagens/procedures.png)
+```sql
+CREATE OR REPLACE PROCEDURE get_dieta_by_min_calories(
+        INOUT id_dieta INT
+    )
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+        calorias_limit NUMERIC := 2000; 
+    BEGIN
+        SELECT dr.id_dieta
+        FROM dieta_refeicoes dr
+        JOIN refeicao r_manha ON dr.id_ref_manha = r_manha.id
+        JOIN refeicao r_tarde ON dr.id_ref_tarde = r_tarde.id
+        JOIN refeicao r_noite ON dr.id_ref_noite = r_noite.id
+        GROUP BY dr.id_dieta
+        HAVING SUM(r_manha.calorias + r_tarde.calorias + r_noite.calorias) <= calorias_limit
+        ORDER BY SUM(r_manha.calorias + r_tarde.calorias + r_noite.calorias) ASC
+        LIMIT 1
+        INTO id_dieta;
 
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'No diet found with the specified calories';
+        END IF;
+    END;
+    $$;
+
+CREATE OR REPLACE PROCEDURE get_total_calories(
+            IN p_id_sessao INTEGER, 
+            INOUT total_calories INTEGER 
+        )
+        LANGUAGE plpgsql
+        AS $$
+        BEGIN
+            SELECT COALESCE(t1.calorias, 0) + COALESCE(t2.calorias, 0) + COALESCE(t3.calorias, 0)
+            INTO total_calories
+            FROM treino_sessao ts
+            JOIN treino t1 ON ts.id_treino1 = t1.id
+            JOIN treino t2 ON ts.id_treino2 = t2.id
+            JOIN treino t3 ON ts.id_treino3 = t3.id
+            WHERE ts.id_sessao = p_id_sessao;  
+
+            IF NOT FOUND THEN
+                total_calories := 0; 
+            END IF;
+        END;
+        $$;
+
+        
+```
 Função get_dieta_by_min_calories:
 	Esta função retorna a dieta que contém a menor quantidade de calorias, de acordo com um limite fixo de 2000 calorias. Ela utiliza joins entre as refeições (manhã, tarde e noite) associadas a uma dieta e calcula o total de calorias dessas refeições. O uso dessa função é vantajoso em cenários onde o sistema precisa rapidamente identificar dietas que se enquadrem em uma determinada restrição calórica, tornando a consulta mais eficiente e reutilizável em diversas partes do sistema.
 Função get_total_calories:

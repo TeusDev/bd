@@ -44,3 +44,5 @@ CREATE OR REPLACE PROCEDURE get_total_calories(
             END IF;
         END;
         $$;
+
+        

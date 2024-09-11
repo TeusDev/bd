@@ -133,7 +133,7 @@ def view_planos (current_user: CurrentUser,session: SessionDep, skip: int = 0, l
     result = session.execute(
         sql_query,{"id_user":current_user.id,"limit": limit, "skip": skip}
         )
-        
+
     planos = [Plan(
                 plano_id=row[0],
                 usuarios_id=row[1],
@@ -150,6 +150,13 @@ def view_planos (current_user: CurrentUser,session: SessionDep, skip: int = 0, l
             )
             for row in result
         ]
+    
+    if not planos:
+            raise HTTPException(
+                status_code=404,
+                detail="Plano not found."
+        )
+            
     plano_public = planos[0]
     if not plano_public:
             raise HTTPException(
@@ -280,31 +287,41 @@ def create_planos_user(
     """
 
     create_procedure_sql = text("""
-        CREATE OR REPLACE FUNCTION get_dieta_by_min_calories()
-        RETURNS TABLE(id_dieta INT) AS $$
-        DECLARE
-            calorias_limit NUMERIC;  -- Renomeie para evitar ambiguidade
-        BEGIN
-            calorias_limit := 2000;  -- Exemplo de valor fixo para o limite de calorias
-
-            RETURN QUERY
-         SELECT dr.id_dieta
+    CREATE OR REPLACE PROCEDURE get_dieta_by_min_calories(
+        INOUT id_dieta INT
+    )
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+        calorias_limit NUMERIC := 2000;  -- Example fixed value for the calorie limit
+    BEGIN
+        -- Selects the id_dieta based on the calorie limit
+        SELECT dr.id_dieta
         FROM dieta_refeicoes dr
         JOIN refeicao r_manha ON dr.id_ref_manha = r_manha.id
         JOIN refeicao r_tarde ON dr.id_ref_tarde = r_tarde.id
         JOIN refeicao r_noite ON dr.id_ref_noite = r_noite.id
         GROUP BY dr.id_dieta
-        HAVING SUM(r_manha.calorias + r_tarde.calorias + r_noite.calorias) <= SUM(calorias_limit)
+        HAVING SUM(r_manha.calorias + r_tarde.calorias + r_noite.calorias) <= calorias_limit
         ORDER BY SUM(r_manha.calorias + r_tarde.calorias + r_noite.calorias) ASC
-        LIMIT 1;
-        END;
-        $$ LANGUAGE plpgsql;
-        """)
+        LIMIT 1
+        INTO id_dieta;
 
-    
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'No diet found with the specified calories';
+        END IF;
+    END;
+    $$;
+""")
+
     session.execute(create_procedure_sql)
     session.commit()
-    id_dieta = get_dieta_by_min_calorias(session=session)
+
+    call_procedure_sql = text("CALL get_dieta_by_min_calories(:id_dieta)")
+    result = session.execute(call_procedure_sql, {'id_dieta': None})
+
+    id_dieta = result.fetchone()[0]
+
     
     proc = text("""
             SELECT t.id

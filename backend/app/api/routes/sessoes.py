@@ -171,12 +171,13 @@ def create_sessao(*, session: SessionDep,
     session.commit()
     session.refresh(sessao_ref)
 
-
     create_procedure_sql = text("""
-        CREATE OR REPLACE FUNCTION get_total_calories(p_id_sessao INTEGER)  -- Renamed parameter
-        RETURNS INTEGER AS $$
-        DECLARE
-            total_calories INTEGER;
+        CREATE OR REPLACE PROCEDURE get_total_calories(
+            IN p_id_sessao INTEGER,  -- Input parameter
+            INOUT total_calories INTEGER  -- INOUT parameter
+        )
+        LANGUAGE plpgsql
+        AS $$
         BEGIN
             SELECT COALESCE(t1.calorias, 0) + COALESCE(t2.calorias, 0) + COALESCE(t3.calorias, 0)
             INTO total_calories
@@ -184,18 +185,28 @@ def create_sessao(*, session: SessionDep,
             JOIN treino t1 ON ts.id_treino1 = t1.id
             JOIN treino t2 ON ts.id_treino2 = t2.id
             JOIN treino t3 ON ts.id_treino3 = t3.id
-            WHERE ts.id_sessao = p_id_sessao;  -- Use the renamed parameter here
+            WHERE ts.id_sessao = p_id_sessao;  
 
-            RETURN total_calories;
+            IF NOT FOUND THEN
+                total_calories := 0; 
+            END IF;
         END;
-        $$ LANGUAGE plpgsql;
-        """)
-    
+        $$;
+    """)
+
     session.execute(create_procedure_sql)
     session.commit()
-    result = session.execute(text(f"SELECT get_total_calories(CAST({sessao_in.id} AS INTEGER))"))
-    total_calories = result.scalar()
+
+    p_id_sessao = sessao_in.id  
+    output_calories = session.execute(
+        text("CALL get_total_calories(:p_id_sessao, :total_calories)"),
+        {'p_id_sessao': p_id_sessao, 'total_calories': None} 
+    )
+
+    total_calories = output_calories.fetchone()[0] 
+
     exercise_details = get_exercise_details(session, sessao.id)
+
     sessoes = SessaoPublic(
         id=sessao.id,
         data=sessao_in.data,
@@ -208,6 +219,7 @@ def create_sessao(*, session: SessionDep,
         grupo_muscular3=exercise_details.grupo_muscular3,
         calorias_gastas=total_calories
     )
+
     return sessoes
 
 @router.delete("/{sessao}",  dependencies=[Depends(get_current_active_superuser)],)
